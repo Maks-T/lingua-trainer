@@ -1,0 +1,371 @@
+{
+  "id": "en-b1-dm01",
+  "title": "Dark Matter: Chapter 1 — The Abduction",
+  "lang": "en",
+  "level": "b1",
+  "voice": "en-GB-RyanNeural",
+  "text": [
+    {
+      "id": "t1",
+      "target": "I love Thursday nights. They have a feel to them that’s outside of time. It’s our tradition, just the three of us—family night.",
+      "ru": "Я люблю вечера четвергов. В них есть ощущение безвременья. Это наша традиция, только мы втроем — семейный вечер.",
+      "audio": "audio/en/b1/unit_dm_ch1/t1.mp3"
+    },
+    {
+      "id": "t2",
+      "target": "Standing happy and slightly drunk in my kitchen, I’m unaware that tonight is the end of all of this. The end of everything I know, everything I love.",
+      "ru": "Стоя на кухне, счастливый и слегка пьяный, я не подозреваю, что сегодняшний вечер — конец всего этого. Конец всего, что я знаю, всего, что люблю.",
+      "audio": "audio/en/b1/unit_dm_ch1/t2.mp3"
+    },
+    {
+      "id": "t3",
+      "target": "No one tells you it’s all about to change, to be taken away. There’s no proximity alert, no indication that you’re standing on the precipice.",
+      "ru": "Никто не предупреждает тебя, что все вот-вот изменится, будет отнято. Нет никакого сигнала тревоги, никакого намека на то, что ты стоишь на краю пропасти.",
+      "audio": "audio/en/b1/unit_dm_ch1/t3.mp3"
+    },
+    {
+      "id": "t4",
+      "target": "Fifteen years ago, before we met, Daniela was a comer to Chicago’s art scene. Then came life. Me. Charlie. A bout of crippling postpartum depression.",
+      "ru": "Пятнадцать лет назад, до нашей встречи, Даниэла была восходящей звездой арт-сцены Чикаго. Потом началась жизнь. Я. Чарли. Приступ тяжелейшей послеродовой депрессии.",
+      "audio": "audio/en/b1/unit_dm_ch1/t4.mp3"
+    },
+    {
+      "id": "t5",
+      "target": "Ryan smiles, looking exquisitely groomed for the lecture circuit. He says, 'We want you to set us up with a pair of the most expensive pours in the house.'",
+      "ru": "Райан улыбается, выглядя безупречно ухоженным для лекционного тура. Он говорит: «Налей-ка нам по паре самых дорогих напитков в заведении».",
+      "audio": "audio/en/b1/unit_dm_ch1/t5.mp3"
+    },
+    {
+      "id": "t6",
+      "target": "He says, 'Just a question, but do you see yourself more as a research scientist or a teacher these days?'",
+      "ru": "Он говорит: «Просто вопрос, но кем ты видишь себя сейчас — ученым-исследователем или преподавателем?»",
+      "audio": "audio/en/b1/unit_dm_ch1/t6.mp3"
+    },
+    {
+      "id": "t7",
+      "target": "I love my life, but I haven’t felt that lightness of being in ages. Autumn nights like this are as close as I get. The cold is beginning to clear my head.",
+      "ru": "Я люблю свою жизнь, но я уже целую вечность не чувствовал этой легкости бытия. Осенние ночи вроде этой — самое близкое к ней. Холод начинает прояснять мою голову.",
+      "audio": "audio/en/b1/unit_dm_ch1/t7.mp3"
+    },
+    {
+      "id": "t8",
+      "target": "The low, raspy voice behind the geisha mask says, 'Turn around.' The second thing I see is the barrel of a gun, four inches from the end of my nose.",
+      "ru": "Низкий хриплый голос из-под маски гейши произносит: «Повернись». Второе, что я вижу — дуло пистолета в четырех дюймах от кончика моего носа.",
+      "audio": "audio/en/b1/unit_dm_ch1/t8.mp3"
+    },
+    {
+      "id": "t9",
+      "target": "'Jason, just so we’re clear, if you do anything other than follow these directions to the letter, I’m going to shoot you through the seat.'",
+      "ru": "«Джейсон, чтобы расставить точки над i: если ты сделаешь хоть что-то, кроме буквального следования инструкциям, я выстрелю в тебя прямо сквозь сиденье».",
+      "audio": "audio/en/b1/unit_dm_ch1/t9.mp3"
+    },
+    {
+      "id": "t10",
+      "target": "Then he drops the ampoule and the syringe on the concrete between us. I whisper, 'Now what?' And he says, 'You wouldn’t believe me if I told you.'",
+      "ru": "Затем он бросает ампулу и шприц на бетон между нами. Я шепчу: «Что теперь?» И он отвечает: «Ты бы не поверил мне, если бы я сказал».",
+      "audio": "audio/en/b1/unit_dm_ch1/t10.mp3"
+    }
+  ],
+  "words": [
+    {
+      "id": "w1",
+      "target": "tradition",
+      "ru": "традиция, обычай",
+      "transcript": "[trəˈdɪʃn]",
+      "distractorLetters": "e o u",
+      "audio": "audio/en/b1/unit_dm_ch1/w1.mp3"
+    },
+    {
+      "id": "w2",
+      "target": "precipice",
+      "ru": "пропасть, обрыв",
+      "transcript": "[ˈpresəpɪs]",
+      "distractorLetters": "a o u",
+      "audio": "audio/en/b1/unit_dm_ch1/w2.mp3"
+    },
+    {
+      "id": "w3",
+      "target": "unaware",
+      "ru": "не подозревающий, не знающий",
+      "transcript": "[ˌʌnəˈweə]",
+      "distractorLetters": "o i s",
+      "audio": "audio/en/b1/unit_dm_ch1/w3.mp3"
+    },
+    {
+      "id": "w4",
+      "target": "cardinal",
+      "ru": "главный, фундаментальный",
+      "transcript": "[ˈkɑːdɪnl]",
+      "distractorLetters": "e o u",
+      "audio": "audio/en/b1/unit_dm_ch1/w4.mp3"
+    },
+    {
+      "id": "w5",
+      "target": "derailment",
+      "ru": "срыв, крушение планов",
+      "transcript": "[dɪˈreɪlmənt]",
+      "distractorLetters": "o u s",
+      "audio": "audio/en/b1/unit_dm_ch1/w5.mp3"
+    },
+    {
+      "id": "w6",
+      "target": "accolade",
+      "ru": "признание, награда, похвала",
+      "transcript": "[ˈækəleɪd]",
+      "distractorLetters": "u i r",
+      "audio": "audio/en/b1/unit_dm_ch1/w6.mp3"
+    },
+    {
+      "id": "w7",
+      "target": "hyperbole",
+      "ru": "гипербола, преувеличение",
+      "transcript": "[haɪˈpɜːbəli]",
+      "distractorLetters": "a o u",
+      "audio": "audio/en/b1/unit_dm_ch1/w7.mp3"
+    },
+    {
+      "id": "w8",
+      "target": "ubiquitous",
+      "ru": "вездесущий, повсеместный",
+      "transcript": "[juːˈbɪkwɪtəs]",
+      "distractorLetters": "a o e",
+      "audio": "audio/en/b1/unit_dm_ch1/w8.mp3"
+    },
+    {
+      "id": "w9",
+      "target": "exquisite",
+      "ru": "изысканный, утонченный",
+      "transcript": "[ɪkˈskwɪzɪt]",
+      "distractorLetters": "a o u",
+      "audio": "audio/en/b1/unit_dm_ch1/w9.mp3"
+    },
+    {
+      "id": "w10",
+      "target": "seminal",
+      "ru": "основополагающий, эпохальный",
+      "transcript": "[ˈsemɪnl]",
+      "distractorLetters": "o u r",
+      "audio": "audio/en/b1/unit_dm_ch1/w10.mp3"
+    },
+    {
+      "id": "w11",
+      "target": "solitude",
+      "ru": "одиночество, уединение",
+      "transcript": "[ˈsɒlətjuːd]",
+      "distractorLetters": "a e r",
+      "audio": "audio/en/b1/unit_dm_ch1/w11.mp3"
+    },
+    {
+      "id": "w12",
+      "target": "weightless",
+      "ru": "невесомый, парящий",
+      "transcript": "[ˈweɪtləs]",
+      "distractorLetters": "o u a",
+      "audio": "audio/en/b1/unit_dm_ch1/w12.mp3"
+    },
+    {
+      "id": "w13",
+      "target": "hesitate",
+      "ru": "колебаться, сомневаться",
+      "transcript": "[ˈhezɪteɪt]",
+      "distractorLetters": "o u r",
+      "audio": "audio/en/b1/unit_dm_ch1/w13.mp3"
+    },
+    {
+      "id": "w14",
+      "target": "abductor",
+      "ru": "похититель",
+      "transcript": "[æbˈdʌktə]",
+      "distractorLetters": "e i s",
+      "audio": "audio/en/b1/unit_dm_ch1/w14.mp3"
+    },
+    {
+      "id": "w15",
+      "target": "direction",
+      "ru": "направление, указание",
+      "transcript": "[dəˈrekʃn]",
+      "distractorLetters": "a u y",
+      "audio": "audio/en/b1/unit_dm_ch1/w15.mp3"
+    },
+    {
+      "id": "w16",
+      "target": "revelation",
+      "ru": "откровение, озарение",
+      "transcript": "[ˌrevəˈleɪʃn]",
+      "distractorLetters": "u o m",
+      "audio": "audio/en/b1/unit_dm_ch1/w16.mp3"
+    },
+    {
+      "id": "w17",
+      "target": "lucid",
+      "ru": "ясный, мыслящий здраво",
+      "transcript": "[ˈluːsɪd]",
+      "distractorLetters": "e a o",
+      "audio": "audio/en/b1/unit_dm_ch1/w17.mp3"
+    },
+    {
+      "id": "w18",
+      "target": "syringe",
+      "ru": "шприц",
+      "transcript": "[sɪˈrɪndʒ]",
+      "distractorLetters": "a o u",
+      "audio": "audio/en/b1/unit_dm_ch1/w18.mp3"
+    },
+    {
+      "id": "w19",
+      "target": "nightmare",
+      "ru": "кошмар",
+      "transcript": "[ˈnaɪtmeə]",
+      "distractorLetters": "o u s",
+      "audio": "audio/en/b1/unit_dm_ch1/w19.mp3"
+    },
+    {
+      "id": "w20",
+      "target": "destiny",
+      "ru": "судьба, предназначение",
+      "transcript": "[ˈdestəni]",
+      "distractorLetters": "a o u",
+      "audio": "audio/en/b1/unit_dm_ch1/w20.mp3"
+    }
+  ],
+  "sentences": [
+    {
+      "id": "s1",
+      "target": "It is our tradition, just the three of us.",
+      "ru": "Это наша традиция, только мы втроем.",
+      "distractorWords": ["was", "them"],
+      "transcript": "[ɪt ɪz ˈaʊə trəˈdɪʃn dʒʌst ðə θriː əv ʌs]",
+      "audio": "audio/en/b1/unit_dm_ch1/s1.mp3"
+    },
+    {
+      "id": "s2",
+      "target": "Tonight is the end of everything I love.",
+      "ru": "Сегодняшний вечер — это конец всего, что я люблю.",
+      "distractorWords": ["was", "all"],
+      "transcript": "[təˈnaɪt ɪz ði end əv ˈevriθɪŋ aɪ lʌv]",
+      "audio": "audio/en/b1/unit_dm_ch1/s2.mp3"
+    },
+    {
+      "id": "s3",
+      "target": "No one tells you it is all about to change.",
+      "ru": "Никто не говорит тебе, что все вот-вот изменится.",
+      "distractorWords": ["tell", "changed"],
+      "transcript": "[nəʊ wʌn telz juː ɪt ɪz ɔːl əˈbaʊt tə tʃeɪndʒ]",
+      "audio": "audio/en/b1/unit_dm_ch1/s3.mp3"
+    },
+    {
+      "id": "s4",
+      "target": "I am violating the cardinal rule of family night.",
+      "ru": "Я нарушаю главное правило семейного вечера.",
+      "distractorWords": ["was", "rules"],
+      "transcript": "[aɪ æm ˈvaɪəleɪtɪŋ ðə ˈkɑːdɪnl ruːl əv ˈfæməli naɪt]",
+      "audio": "audio/en/b1/unit_dm_ch1/s4.mp3"
+    },
+    {
+      "id": "s5",
+      "target": "We are drinking the best tonight.",
+      "ru": "Сегодня мы пьем самое лучшее.",
+      "distractorWords": ["were", "good"],
+      "transcript": "[wiː ɑːr ˈdrɪŋkɪŋ ðə best təˈnaɪt]",
+      "audio": "audio/en/b1/unit_dm_ch1/s5.mp3"
+    },
+    {
+      "id": "s6",
+      "target": "You are smarter than I am.",
+      "ru": "Ты умнее, чем я.",
+      "distractorWords": ["is", "smart"],
+      "transcript": "[juː ɑːr ˈsmɑːtə ðæn aɪ æm]",
+      "audio": "audio/en/b1/unit_dm_ch1/s6.mp3"
+    },
+    {
+      "id": "s7",
+      "target": "The cold is beginning to clear my head.",
+      "ru": "Холод начинает прояснять мои мысли.",
+      "distractorWords": ["was", "cleared"],
+      "transcript": "[ðə kəʊld ɪz bɪˈɡɪnɪŋ tə klɪə maɪ hed]",
+      "audio": "audio/en/b1/unit_dm_ch1/s7.mp3"
+    },
+    {
+      "id": "s8",
+      "target": "I am not here for your money.",
+      "ru": "Я здесь не за твоими деньгами.",
+      "distractorWords": ["was", "my"],
+      "transcript": "[aɪ æm nɒt hɪə fɔː jɔː ˈmʌni]",
+      "audio": "audio/en/b1/unit_dm_ch1/s8.mp3"
+    },
+    {
+      "id": "s9",
+      "target": "Start walking into the darkness.",
+      "ru": "Начинай идти в темноту.",
+      "distractorWords": ["walk", "out"],
+      "transcript": "[stɑːt ˈwɔːkɪŋ ˈɪntə ðə ˈdɑːknəs]",
+      "audio": "audio/en/b1/unit_dm_ch1/s9.mp3"
+    },
+    {
+      "id": "s10",
+      "target": "Turn right onto the street.",
+      "ru": "Поверните направо на улицу.",
+      "distractorWords": ["left", "turning"],
+      "transcript": "[tɜːn raɪt ˈɒntə ðə striːt]",
+      "audio": "audio/en/b1/unit_dm_ch1/s10.mp3"
+    },
+    {
+      "id": "s11",
+      "target": "Am I going to die tonight?",
+      "ru": "Умру ли я сегодняшней ночью?",
+      "distractorWords": ["are", "dead"],
+      "transcript": "[æm aɪ ˈɡəʊɪŋ tə daɪ təˈnaɪt]",
+      "audio": "audio/en/b1/unit_dm_ch1/s11.mp3"
+    },
+    {
+      "id": "s12",
+      "target": "They do not even know what I am experiencing.",
+      "ru": "Они даже не знают, что я сейчас переживаю.",
+      "distractorWords": ["does", "experience"],
+      "transcript": "[ðeɪ duː nɒt ˈiːvn nəʊ wɒt aɪ æm ɪkˈspɪəriənsɪŋ]",
+      "audio": "audio/en/b1/unit_dm_ch1/s12.mp3"
+    },
+    {
+      "id": "s13",
+      "target": "What happens now?",
+      "ru": "Что происходит теперь?",
+      "distractorWords": ["happen", "then"],
+      "transcript": "[wɒt ˈhæpənz naʊ]",
+      "audio": "audio/en/b1/unit_dm_ch1/s13.mp3"
+    },
+    {
+      "id": "s14",
+      "target": "You would not believe me if I told you.",
+      "ru": "Ты бы не поверил мне, если бы я сказал тебе.",
+      "distractorWords": ["will", "tell"],
+      "transcript": "[juː wʊd nɒt bɪˈliːv miː ɪf aɪ təʊld juː]",
+      "audio": "audio/en/b1/unit_dm_ch1/s14.mp3"
+    }
+  ],
+  "colors": [
+    {
+      "color": "limeGreen",
+      "words": ["love", "is", "tells", "violating", "drinking", "are", "beginning", "clear", "Start", "walking", "Turn", "die", "know", "experiencing", "happens", "believe", "told", "am"]
+    },
+    {
+      "color": "orangeRed",
+      "words": ["It", "us", "I", "No", "one", "you", "We", "my", "your", "They", "what", "me"]
+    },
+    {
+      "color": "dodgerBlue",
+      "words": ["happy", "best", "smarter", "cold", "now", "tonight", "right"]
+    },
+    {
+      "color": "gold",
+      "words": ["our", "the", "a", "of", "all", "about", "to", "than", "for", "into", "onto", "even", "if", "would", "not"]
+    },
+    {
+      "color": "chocolate",
+      "words": ["just", "three", "everything", "here", "rule", "night", "head", "money", "darkness", "street"]
+    },
+    {
+      "color": "darkOrchid",
+      "words": ["tradition", "rule", "money", "darkness", "street", "head", "night"]
+    }
+  ]
+}
