@@ -1,0 +1,357 @@
+{
+  "id": "de-a1-01",
+  "title": "Урок 1: Знакомство, происхождение и профессии",
+  "lang": "de",
+  "level": "a1",
+  "voice": "de-DE-ConradNeural",
+  "text": [
+    {
+      "id": "t1",
+      "target": "Hallo! Guten Tag! Ich heiße Alex. Wie heißt du?",
+      "ru": "Привет! Добрый день! Меня зовут Алекс. Как тебя зовут?",
+      "audio": "audio/de/a1/unit_01/t1.mp3"
+    },
+    {
+      "id": "t2",
+      "target": "Guten Tag, Alex! Ich heiße Sarah. Freut mich, dich kennenzulernen!",
+      "ru": "Добрый день, Алекс! Меня зовут Сара. Очень приятно познакомиться!",
+      "audio": "audio/de/a1/unit_01/t2.mp3"
+    },
+    {
+      "id": "t3",
+      "target": "Woher kommst du, Sarah, und wo wohnst du jetzt?",
+      "ru": "Откуда ты родом, Сара, и где ты сейчас живёшь?",
+      "audio": "audio/de/a1/unit_01/t3.mp3"
+    },
+    {
+      "id": "t4",
+      "target": "Ich komme aus Deutschland, aber jetzt wohne ich in Wien. Und du?",
+      "ru": "Я родом из Германии, но сейчас я живу в Вене. А ты?",
+      "audio": "audio/de/a1/unit_01/t4.mp3"
+    },
+    {
+      "id": "t5",
+      "target": "Ich komme aus Österreich und ich wohne auch in Wien.",
+      "ru": "Я родом из Австрии и я тоже живу в Вене.",
+      "audio": "audio/de/a1/unit_01/t5.mp3"
+    },
+    {
+      "id": "t6",
+      "target": "Was bist du von Beruf? Arbeitest du hier?",
+      "ru": "Кто ты по профессии? Ты работаешь здесь?",
+      "audio": "audio/de/a1/unit_01/t6.mp3"
+    },
+    {
+      "id": "t7",
+      "target": "Ich bin Programmierer von Beruf. Ich lerne jetzt fleißig Deutsch.",
+      "ru": "Я программист по профессии. Сейчас я усердно учу немецкий язык.",
+      "audio": "audio/de/a1/unit_01/t7.mp3"
+    },
+    {
+      "id": "t8",
+      "target": "Super! Du sprichst schon gut Deutsch. Das Lernen macht Spaß!",
+      "ru": "Супер! Ты уже хорошо говоришь по-немецки. Учёба доставляет удовольствие!",
+      "audio": "audio/de/a1/unit_01/t8.mp3"
+    }
+  ],
+  "words": [
+    {
+      "id": "w1",
+      "target": "heißen",
+      "ru": "зваться, называться",
+      "transcript": "[ˈhaɪsn̩]",
+      "distractorLetters": "o u y",
+      "audio": "audio/de/a1/unit_01/w1.mp3"
+    },
+    {
+      "id": "w2",
+      "target": "kommen",
+      "ru": "приходить, быть родом",
+      "transcript": "[ˈkɔmən]",
+      "distractorLetters": "a e r",
+      "audio": "audio/de/a1/unit_01/w2.mp3"
+    },
+    {
+      "id": "w3",
+      "target": "wohnen",
+      "ru": "жить, проживать",
+      "transcript": "[ˈvoːnən]",
+      "distractorLetters": "m k s",
+      "audio": "audio/de/a1/unit_01/w3.mp3"
+    },
+    {
+      "id": "w4",
+      "target": "lernen",
+      "ru": "учить, изучать",
+      "transcript": "[ˈlɛrnən]",
+      "distractorLetters": "i d p",
+      "audio": "audio/de/a1/unit_01/w4.mp3"
+    },
+    {
+      "id": "w5",
+      "target": "sprechen",
+      "ru": "говорить",
+      "transcript": "[ˈʃprɛçn̩]",
+      "distractorLetters": "a u b",
+      "audio": "audio/de/a1/unit_01/w5.mp3"
+    },
+    {
+      "id": "w6",
+      "target": "verstehen",
+      "ru": "понимать",
+      "transcript": "[fɛɐ̯ˈʃteːən]",
+      "distractorLetters": "i m l",
+      "audio": "audio/de/a1/unit_01/w6.mp3"
+    },
+    {
+      "id": "w7",
+      "target": "machen",
+      "ru": "делать, совершать",
+      "transcript": "[ˈmaxn̩]",
+      "distractorLetters": "e o t",
+      "audio": "audio/de/a1/unit_01/w7.mp3"
+    },
+    {
+      "id": "w8",
+      "target": "arbeiten",
+      "ru": "работать",
+      "transcript": "[ˈaʁbaɪtn̩]",
+      "distractorLetters": "u s k",
+      "audio": "audio/de/a1/unit_01/w8.mp3"
+    },
+    {
+      "id": "w9",
+      "target": "Name",
+      "ru": "имя, фамилия",
+      "transcript": "[ˈnaːmə]",
+      "distractorLetters": "o i t",
+      "audio": "audio/de/a1/unit_01/w9.mp3"
+    },
+    {
+      "id": "w10",
+      "target": "Vorname",
+      "ru": "имя (личное)",
+      "transcript": "[ˈfoːɐ̯ˌnaːmə]",
+      "distractorLetters": "u l d",
+      "audio": "audio/de/a1/unit_01/w10.mp3"
+    },
+    {
+      "id": "w11",
+      "target": "Beruf",
+      "ru": "профессия",
+      "transcript": "[bəˈruːf]",
+      "distractorLetters": "a o s",
+      "audio": "audio/de/a1/unit_01/w11.mp3"
+    },
+    {
+      "id": "w12",
+      "target": "Programmierer",
+      "ru": "программист",
+      "transcript": "[proɡraˈmiːrɐ]",
+      "distractorLetters": "b l d",
+      "audio": "audio/de/a1/unit_01/w12.mp3"
+    },
+    {
+      "id": "w13",
+      "target": "Stadt",
+      "ru": "город",
+      "transcript": "[ʃtat]",
+      "distractorLetters": "o r n",
+      "audio": "audio/de/a1/unit_01/w13.mp3"
+    },
+    {
+      "id": "w14",
+      "target": "Land",
+      "ru": "страна, земля",
+      "transcript": "[lant]",
+      "distractorLetters": "u e s",
+      "audio": "audio/de/a1/unit_01/w14.mp3"
+    },
+    {
+      "id": "w15",
+      "target": "Sprache",
+      "ru": "язык, речь",
+      "transcript": "[ˈʃpraːxə]",
+      "distractorLetters": "o i u",
+      "audio": "audio/de/a1/unit_01/w15.mp3"
+    },
+    {
+      "id": "w16",
+      "target": "Deutsch",
+      "ru": "немецкий язык",
+      "transcript": "[dɔʏtʃ]",
+      "distractorLetters": "a k m",
+      "audio": "audio/de/a1/unit_01/w16.mp3"
+    },
+    {
+      "id": "w17",
+      "target": "Englisch",
+      "ru": "английский язык",
+      "transcript": "[ˈɛŋlɪʃ]",
+      "distractorLetters": "o a t",
+      "audio": "audio/de/a1/unit_01/w17.mp3"
+    },
+    {
+      "id": "w18",
+      "target": "Russisch",
+      "ru": "русский язык",
+      "transcript": "[ˈrʊsɪʃ]",
+      "distractorLetters": "e a k",
+      "audio": "audio/de/a1/unit_01/w18.mp3"
+    },
+    {
+      "id": "w19",
+      "target": "Lernen",
+      "ru": "учёба, обучение",
+      "transcript": "[ˈlɛrnən]",
+      "distractorLetters": "k g v",
+      "audio": "audio/de/a1/unit_01/w19.mp3"
+    },
+    {
+      "id": "w20",
+      "target": "Spaß",
+      "ru": "удовольствие, веселье",
+      "transcript": "[ʃpaːs]",
+      "distractorLetters": "z t e",
+      "audio": "audio/de/a1/unit_01/w20.mp3"
+    }
+  ],
+  "sentences": [
+    {
+      "id": "s1",
+      "target": "Ich heiße Alex.",
+      "ru": "Меня зовут Алекс.",
+      "distractorWords": ["bist", "wohne"],
+      "transcript": "[ɪç ˈhaɪsə ˈalɛks]",
+      "audio": "audio/de/a1/unit_01/s1.mp3"
+    },
+    {
+      "id": "s2",
+      "target": "Wie ist dein Name?",
+      "ru": "Как твое имя?",
+      "distractorWords": ["bist", "wo"],
+      "transcript": "[viː ɪst daɪn ˈnaːmə]",
+      "audio": "audio/de/a1/unit_01/s2.mp3"
+    },
+    {
+      "id": "s3",
+      "target": "Ich bin Programmierer von Beruf.",
+      "ru": "Я программист по профессии.",
+      "distractorWords": ["ist", "eine"],
+      "transcript": "[ɪç bɪn proɡraˈmiːrɐ fɔn bəˈruːf]",
+      "audio": "audio/de/a1/unit_01/s3.mp3"
+    },
+    {
+      "id": "s4",
+      "target": "Was bist du von Beruf?",
+      "ru": "Кто ты по профессии?",
+      "distractorWords": ["wo", "ist"],
+      "transcript": "[vas bɪst duː fɔn bəˈruːf]",
+      "audio": "audio/de/a1/unit_01/s4.mp3"
+    },
+    {
+      "id": "s5",
+      "target": "Woher kommst du?",
+      "ru": "Откуда ты родом?",
+      "distractorWords": ["wo", "kommt"],
+      "transcript": "[voˈheːɐ̯ kɔmst duː]",
+      "audio": "audio/de/a1/unit_01/s5.mp3"
+    },
+    {
+      "id": "s6",
+      "target": "Ich komme aus Deutschland.",
+      "ru": "Я родом из Германии.",
+      "distractorWords": ["in", "nach"],
+      "transcript": "[ɪç ˈkɔmə aʊs ˈdɔʏtʃlant]",
+      "audio": "audio/de/a1/unit_01/s6.mp3"
+    },
+    {
+      "id": "s7",
+      "target": "Wo wohnst du jetzt?",
+      "ru": "Где ты сейчас живешь?",
+      "distractorWords": ["woher", "wohnt"],
+      "transcript": "[voː voːnst duː jɛtst]",
+      "audio": "audio/de/a1/unit_01/s7.mp3"
+    },
+    {
+      "id": "s8",
+      "target": "Jetzt wohne ich in Berlin.",
+      "ru": "Сейчас я живу в Берлине.",
+      "distractorWords": ["aus", "wohnt"],
+      "transcript": "[jɛtst ˈvoːnə ɪç ɪn bɛrˈliːn]",
+      "audio": "audio/de/a1/unit_01/s8.mp3"
+    },
+    {
+      "id": "s9",
+      "target": "Wohnst du in Wien?",
+      "ru": "Ты живешь в Вене?",
+      "distractorWords": ["wohnt", "aus"],
+      "transcript": "[voːnst duː ɪn viːn]",
+      "audio": "audio/de/a1/unit_01/s9.mp3"
+    },
+    {
+      "id": "s10",
+      "target": "Sprichst du Deutsch und Englisch?",
+      "ru": "Ты говоришь по-немецки и по-английски?",
+      "distractorWords": ["spreche", "aber"],
+      "transcript": "[ʃprɪçst duː dɔʏtʃ ʊnt ˈɛŋlɪʃ]",
+      "audio": "audio/de/a1/unit_01/s10.mp3"
+    },
+    {
+      "id": "s11",
+      "target": "Ich spreche Russisch und ein bisschen Deutsch.",
+      "ru": "Я говорю по-русски и немного по-немецки.",
+      "distractorWords": ["sehr", "spricht"],
+      "transcript": "[ɪç ˈʃprɛçə ˈrʊsɪʃ ʊnt aɪn ˈbɪsçən dɔʏtʃ]",
+      "audio": "audio/de/a1/unit_01/s11.mp3"
+    },
+    {
+      "id": "s12",
+      "target": "Ich spreche nicht gut Deutsch.",
+      "ru": "Я говорю по-немецки не очень хорошо.",
+      "distractorWords": ["kein", "nichts"],
+      "transcript": "[ɪç ˈʃprɛçə nɪçt ɡuːt dɔʏtʃ]",
+      "audio": "audio/de/a1/unit_01/s12.mp3"
+    },
+    {
+      "id": "s13",
+      "target": "Welche Sprachen sprichst du?",
+      "ru": "На каких языках ты говоришь?",
+      "distractorWords": ["was", "spricht"],
+      "transcript": "[ˈvɛlçə ˈʃpraːxn̩ ʃprɪçst duː]",
+      "audio": "audio/de/a1/unit_01/s13.mp3"
+    },
+    {
+      "id": "s14",
+      "target": "Sehr gern lerne ich Deutsch.",
+      "ru": "Я с большим удовольствием учу немецкий.",
+      "distractorWords": ["lernt", "gut"],
+      "transcript": "[zeːɐ̯ ɡɛrn ˈlɛrnə ɪç dɔʏtʃ]",
+      "audio": "audio/de/a1/unit_01/s14.mp3"
+    },
+    {
+      "id": "s15",
+      "target": "Ich verstehe ein bisschen Deutsch.",
+      "ru": "Я немного понимаю по-немецки.",
+      "distractorWords": ["versteht", "nicht"],
+      "transcript": "[ɪç fɛɐ̯ˈʃteːə aɪn ˈbɪsçən dɔʏtʃ]",
+      "audio": "audio/de/a1/unit_01/s15.mp3"
+    },
+    {
+      "id": "s16",
+      "target": "Das Lernen macht mir viel Spaß.",
+      "ru": "Учеба доставляет мне много удовольствия.",
+      "distractorWords": ["machen", "gut"],
+      "transcript": "[das ˈlɛrnən maxt miːɐ̯ fiːl ʃpaːs]",
+      "audio": "audio/de/a1/unit_01/s16.mp3"
+    }
+  ],
+  "colors": [
+    { "color": "limeGreen", "words": ["bin", "ist", "bist", "heiße", "heißt", "kommst", "komme", "wohne", "wohnst", "lerne", "lernt", "spreche", "sprichst", "verstehe", "versteht", "macht", "machen", "arbeiten", "arbeitest"] },
+    { "color": "orangeRed", "words": ["Ich", "du", "er", "sie", "es", "wir", "dich", "mir"] },
+    { "color": "dodgerBlue", "words": ["mein", "dein", "Wie", "Woher", "Wo", "Was", "Welche"] },
+    { "color": "gold", "words": ["der", "die", "das", "ein", "eine", "nicht", "auch", "sehr", "viel"] },
+    { "color": "chocolate", "words": ["aus", "in", "von"] },
+    { "color": "darkOrchid", "words": ["Alex", "Sarah", "Programmierer", "Beruf", "Name", "Vorname", "Stadt", "Land", "Sprache", "Sprachen", "Deutsch", "Englisch", "Russisch", "Deutschland", "Österreich", "Wien", "Berlin", "Lernen", "Spaß"] }
+  ]
+}

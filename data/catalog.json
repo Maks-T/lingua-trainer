@@ -1,0 +1,85 @@
+{
+  "profiles": [
+    {
+      "id": "dad",
+      "name": "Максим",
+      "avatar": "👨‍💻",
+      "activeDomain": {
+        "lang": "de",
+        "level": "a1"
+      },
+      "courses": [
+        { "lang": "de", "level": "a1" },
+        { "lang": "en", "level": "b1" },
+        { "lang": "pl", "level": "a1" }
+      ]
+    },
+    {
+      "id": "son",
+      "name": "Арсений",
+      "avatar": "👦",
+      "activeDomain": {
+        "lang": "en",
+        "level": "a2"
+      },
+      "courses": [
+        { "lang": "en", "level": "a2" }
+      ]
+    }
+  ],
+  "languages": {
+    "de": {
+      "name": "Немецкий",
+      "flag": "🇩🇪",
+      "defaultVoice": "de-DE-ConradNeural",
+      "levels": {
+        "a1": {
+          "title": "A1 — С нуля",
+          "units": [
+            {
+              "id": "de-a1-01",
+              "name": "Урок 1: Знакомство и глаголы sein / heißen",
+              "file": "data/units/de/a1/unit_01_intro.json",
+              "description": "Приветствия, личные местоимения, рассказ о себе и глагол sein."
+            }
+          ]
+        }
+      }
+    },
+    "en": {
+      "name": "Английский",
+      "flag": "🇬🇧",
+      "defaultVoice": "en-GB-RyanNeural",
+      "levels": {
+        "a2": {
+          "title": "A2 — Базовый",
+          "units": [
+            {
+              "id": "en-a2-02",
+              "name": "Unit 2, Lesson 1: Handwriting & Personality",
+              "file": "data/units/en/a2/unit_02_character.json",
+              "description": "Черты характера, графология и описание личности."
+            }
+          ]
+        },
+        "b1": {
+          "title": "B1 — Средний",
+          "units": [
+            {
+              "id": "en-b1-01",
+              "name": "Unit 1: Personality & Professional Skills",
+              "file": "data/units/en/b1/unit_01_skills.json",
+              "description": "Черты характера, профессиональные навыки и идиомы."
+            }
+          ]
+        }
+      }
+    },
+    "pl": {
+      "name": "Польский",
+      "flag": "🇵🇱",
+      "defaultVoice": "pl-PL-MarekNeural",
+      "levels": {}
+    }
+  }
+}

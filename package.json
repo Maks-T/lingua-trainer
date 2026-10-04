@@ -1,0 +1,23 @@
+{
+  "name": "lingua-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy:gh-pages": "node config/deploy/deploy-gh-pages.js"
+  },
+  "dependencies": {
+    "compromise": "^14.14.4"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

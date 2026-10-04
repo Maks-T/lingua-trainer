@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lingua Studio</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app-container">
+      <header class="app-header">
+        <div class="header-main">
+          <div class="brand">
+            <span class="brand-logo">🌐</span>
+            <span class="brand-name">Lingua Studio</span>
+          </div>
+
+          <select id="profile-select" class="select-control profile-select" aria-label="Выбор профиля"></select>
+
+          <div class="domain-selector">
+            <select id="course-select" class="select-control" aria-label="Выбор курса"></select>
+            <select id="unit-select" class="select-control" aria-label="Выбор урока"></select>
+          </div>
+        </div>
+
+        <div class="header-meta">
+          <div class="stats-panel" id="stats-panel">
+            <span class="stat-item"><span class="stat-label">Верно:</span> <strong id="stat-correct" class="stat-value text-success">0</strong></span>
+            <span class="stat-item"><span class="stat-label">Ошибки:</span> <strong id="stat-mistakes" class="stat-value text-danger">0</strong></span>
+          </div>
+
+          <div class="audio-rate-control">
+            <label for="audio-rate-select" class="rate-label">Скорость:</label>
+            <select id="audio-rate-select" class="select-control select-xs">
+              <option value="0.8">0.8x</option>
+              <option value="1.0" selected>1.0x</option>
+              <option value="1.2">1.2x</option>
+            </select>
+          </div>
+
+            <!-- Кнопка настроек в правом верхнем углу -->
+            <button type="button" class="btn-settings" id="btn-open-settings" title="Настройки профилей и зон" aria-label="Настройки">⚙️</button>
+        </div>
+      </header>
+
+      <nav class="mode-navigation">
+        <button type="button" class="mode-btn active" data-mode="puzzle">
+          <span class="mode-icon">🧩</span>
+          <span class="mode-title">Пазл предложений</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="speller">
+          <span class="mode-icon">🔤</span>
+          <span class="mode-title">Спеллер слов</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="reader">
+          <span class="mode-icon">📖</span>
+          <span class="mode-title">Умный ридер</span>
+        </button>
+        <button type="button" class="mode-btn" data-mode="analyzer">
+          <span class="mode-icon">🔬</span>
+          <span class="mode-title">Текст-лаборатория</span>
+        </button>
+      </nav>
+
+      <main class="app-main" id="app-workspace">
+        <div class="loading-placeholder">
+          <div class="spinner"></div>
+          <p>Загрузка модуля урока...</p>
+        </div>
+      </main>
+
+      <div id="toast-container" class="toast-container" aria-live="polite"></div>
+    </div>
+
+      <!-- Модальное окно настроек: Профили и Доменные зоны -->
+      <div id="settings-modal" class="modal-backdrop" hidden>
+        <div class="modal-window" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+          <div class="modal-header">
+            <h2 id="settings-title" class="modal-title">Настройки обучения</h2>
+            <button type="button" class="modal-close-btn" id="btn-close-settings" aria-label="Закрыть">✕</button>
+          </div>
+
+          <div class="modal-tabs">
+            <button type="button" class="modal-tab-btn active" data-tab="profiles">Профили</button>
+            <button type="button" class="modal-tab-btn" data-tab="tracks">Доменные треки (Зоны)</button>
+          </div>
+
+          <div class="modal-body">
+            <!-- Вкладка: Профили -->
+            <div class="tab-pane active" id="tab-pane-profiles">
+              <div class="settings-section">
+                <h3 class="section-title">Создать профиль</h3>
+                <form id="form-create-profile" class="form-row">
+                  <input type="text" id="input-profile-name" class="input-control" placeholder="Имя (напр. Папа, Сын)" required />
+                  <select id="select-profile-avatar" class="select-control select-avatar">
+                    <option value="👨‍💻">👨‍💻</option>
+                    <option value="👦">👦</option>
+                    <option value="👩‍🎓">👩‍🎓</option>
+                    <option value="🧑">🧑</option>
+                    <option value="🚀">🚀</option>
+                    <option value="⭐">⭐</option>
+                  </select>
+                  <button type="submit" class="btn-action-primary">Добавить</button>
+                </form>
+              </div>
+
+              <div class="settings-section">
+                <h3 class="section-title">Существующие профили</h3>
+                <div id="profiles-list" class="items-list"></div>
+              </div>
+            </div>
+
+            <!-- Вкладка: Доменные треки (Зоны) -->
+            <div class="tab-pane" id="tab-pane-tracks">
+              <div class="settings-section">
+                <h3 class="section-title">Создать учебную зону</h3>
+                <p class="section-desc">Изолируйте темы (видео, подкасты, IT-лексику) от стандартных уроков.</p>
+                <form id="form-create-track" class="form-col">
+                  <div class="form-row">
+                    <select id="input-track-lang" class="select-control select-lang">
+                      <option value="de">🇩🇪 Немецкий</option>
+                      <option value="en">🇬🇧 Английский</option>
+                      <option value="pl">🇵🇱 Польский</option>
+                      <option value="es">🇪🇸 Испанский</option>
+                    </select>
+                    <input type="text" id="input-track-title" class="input-control" placeholder="Название трека (напр. YouTube подкасты)" required />
+                  </div>
+                  <input type="text" id="input-track-desc" class="input-control" placeholder="Описание (необязательно)" />
+                  <button type="submit" class="btn-action-primary" style="align-self: flex-start;">Создать трек</button>
+                </form>
+              </div>
+
+              <div class="settings-section">
+                <h3 class="section-title">Учебные зоны текущего профиля</h3>
+                <div id="tracks-list" class="items-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
