@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+dist-ssr/
+*.local
+
+# Environment & Local Storage
+.env
+.env.local
+.env.*.local
+.local_db/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Diff Migrator & Inputs
+.diff-migrator/
+inputs/
+
+# Project text dumps & temporary files
+*_combine.txt
+*_combined.txt
+tree.txt
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test audio
+public/audio/test_connection.mp3
+public/audio/test.mp3
+
+# IDEs & Editors
+.idea/
+.vscode/
+
+# OS metadata
+.DS_Store
+Thumbs.db

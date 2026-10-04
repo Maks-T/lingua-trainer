@@ -25,6 +25,19 @@
       "courses": [
         { "lang": "en", "level": "a2" }
       ]
+    },
+    {
+      "id": "pavel",
+      "name": "Павел",
+      "avatar": "🧑",
+      "activeDomain": {
+        "lang": "en",
+        "level": "b1"
+      },
+      "courses": [
+        { "lang": "en", "level": "b1" },
+        { "lang": "en", "level": "a2" }
+      ]
     }
   ],
   "languages": {
@@ -70,6 +83,12 @@
               "name": "Unit 1: Personality & Professional Skills",
               "file": "data/units/en/b1/unit_01_skills.json",
               "description": "Черты характера, профессиональные навыки и идиомы."
+            },
+            {
+              "id": "en-b1-dm01",
+              "name": "Dark Matter: Chapter 1 — The Abduction",
+              "file": "data/units/en/b1/unit_dm_ch1.json",
+              "description": "Закрепление первой главы: семейный вечер, бар, дилемма выбора и похищение."
             }
           ]
         }

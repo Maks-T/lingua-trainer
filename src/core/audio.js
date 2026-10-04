@@ -79,7 +79,7 @@ class AudioManager {
       return this._speakFallback(fallbackText, lang, onStart, onEnd);
     }
 
-    const resolvedUrl = url.startsWith('http') || url.startsWith('/') ? url : `/${url}`;
+    const resolvedUrl = url.startsWith('http') || url.startsWith('./') ? url : `./${url.replace(/^\/+/, '')}`;
     this.speechAudio.src = resolvedUrl;
     this.speechAudio.playbackRate = this.playbackRate;
 

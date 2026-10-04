@@ -105,7 +105,7 @@ async def main():
         sys.exit(0 if ok else 1)
 
     else:
-        target_unit = os.path.join(PROJECT_ROOT, "data", "units", "de", "a1", "unit_01_intro.json")
+        target_unit = "--all"
 
     if target_unit == "--all":
         units_dir = os.path.join(PROJECT_ROOT, "data", "units")
