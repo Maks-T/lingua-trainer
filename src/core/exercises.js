@@ -94,6 +94,11 @@ export function getQuizItems(unit) {
   return items;
 }
 
+/** Слова с настоящим переводом — для режима «Пары». */
+export function getMatchWords(unit) {
+  return (unit?.words || []).filter((w) => w.target && hasRealTranslation(w));
+}
+
 /** Элементы для диктанта. source: 'sentences' | 'text' */
 export function getDictationItems(unit, source = 'sentences') {
   if (!unit) return [];
@@ -115,6 +120,7 @@ export function getAllExerciseKeys(unit) {
   return [
     ...(unit.sentences || []).map((s) => `puzzle:${s.id}`),
     ...(unit.words || []).map((w) => `speller:${w.id}`),
+    ...getMatchWords(unit).map((w) => `match:${w.id}`),
     ...getQuizItems(unit).map((q) => q.key),
     ...getDictationItems(unit, 'sentences').map((d) => d.key),
     ...getDictationItems(unit, 'text').map((d) => d.key),

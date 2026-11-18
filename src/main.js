@@ -6,6 +6,7 @@ import { escapeHtml, emptyState, toast } from './core/utils.js';
 import { mountPuzzle, destroyPuzzle } from './modes/puzzle.js';
 import { mountSpeller, destroySpeller } from './modes/speller.js';
 import { mountQuiz, destroyQuiz } from './modes/quiz.js';
+import { mountMatch, destroyMatch } from './modes/match.js';
 import { mountDictation, destroyDictation } from './modes/dictation.js';
 import { mountReader, destroyReader } from './modes/reader.js';
 import { mountAnalyzer, destroyAnalyzer } from './modes/analyzer.js';
@@ -13,6 +14,7 @@ import { mountAnalyzer, destroyAnalyzer } from './modes/analyzer.js';
 const MODE_HANDLERS = {
   puzzle: { mount: mountPuzzle, destroy: destroyPuzzle },
   speller: { mount: mountSpeller, destroy: destroySpeller },
+  match: { mount: mountMatch, destroy: destroyMatch },
   quiz: { mount: mountQuiz, destroy: destroyQuiz },
   dictation: { mount: mountDictation, destroy: destroyDictation },
   reader: { mount: mountReader, destroy: destroyReader },
@@ -37,6 +39,14 @@ const MODE_HINTS = {
       ['Backspace', 'стереть букву'],
       ['Пробел', 'прослушать'],
     ],
+  },
+  match: {
+    title: 'Пары слов',
+    keys: [
+      ['клик', 'выбрать карточку'],
+      ['Esc', 'снять выбор'],
+    ],
+    note: 'Слова озвучиваются при выборе. Для уроков с английскими определениями можно переключиться на «Определение (EN)».',
   },
   quiz: {
     title: 'Вопросы к тексту',

@@ -72,6 +72,7 @@ function renderWord() {
       <div class="prompt">
         <h1 class="prompt-title">${escapeHtml(q.ru || 'Соберите услышанное слово')}</h1>
         ${q.transcript ? `<div class="prompt-sub">${escapeHtml(q.transcript)}</div>` : ''}
+        ${q.definition ? `<div class="prompt-hint" lang="${escapeHtml(unit.lang)}">💬 ${escapeHtml(q.definition)}</div>` : ''}
         <div class="prompt-hint">Букв в слове: ${targetLetters.length}</div>
       </div>
       ${listenButton('speller-listen')}

@@ -85,6 +85,12 @@
               "name": "Dark Matter: Chapter 1 — The Abduction",
               "file": "data/units/en/b1/unit_dm_ch1.json",
               "description": "Закрепление первой главы: семейный вечер, бар, дилемма выбора и похищение."
+            },
+            {
+              "id": "en-b1-ted-smith",
+              "name": "TED: Larry Smith — Why you will fail to have a great career",
+              "file": "data/units/en/b1/unit_ted_smith.json",
+              "description": "Выступление Ларри Смита: страсть vs интерес, оправдания, страх и сожаления. Лексика B1–B2."
             }
           ]
         }

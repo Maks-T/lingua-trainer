@@ -83,7 +83,9 @@ function showPopover(span, word, match) {
   popover = document.createElement('div');
   popover.className = 'word-popover';
   popover.innerHTML = match
-    ? `<strong>${escapeHtml(match.target)}</strong>${match.transcript ? `${escapeHtml(match.transcript)}<br>` : ''}${escapeHtml(match.ru)}`
+    ? `<strong>${escapeHtml(match.target)}</strong>${match.transcript ? `${escapeHtml(match.transcript)}<br>` : ''}${escapeHtml(match.ru)}${
+        match.definition ? `<br><em style="opacity:.75">${escapeHtml(match.definition)}</em>` : ''
+      }`
     : `<strong>${escapeHtml(word)}</strong>нет в словаре урока`;
   document.body.appendChild(popover);
   const rect = span.getBoundingClientRect();
