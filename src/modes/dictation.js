@@ -1,6 +1,7 @@
 import { state } from '../core/state.js';
 import { audio } from '../core/audio.js';
 import { getDictationItems } from '../core/exercises.js';
+import { createQueue, queueHeader, queueFinish } from '../core/queue.js';
 import {
   escapeHtml,
   shuffle,
@@ -9,8 +10,6 @@ import {
   foldGerman,
   levenshtein,
   isModalOpen,
-  exerciseHeader,
-  finishScreen,
   listenButton,
   playWithButton,
   showFeedback,
@@ -36,12 +35,11 @@ let container = null;
 const isOwnButton = (e) => e.target instanceof HTMLButtonElement && Boolean(container?.contains(e.target));
 let unit = null;
 let settings = loadSettings();
-let items = [];
-let index = 0;
+let queue = null;
+let lastCorrect = false;
 let tokens = [];
 let gaps = []; // { tokenIndex, answer, input }
 let checked = false;
-let firstTryCorrect = 0;
 let lastFocused = null;
 
 function loadSettings() {
@@ -90,9 +88,7 @@ function pickGaps(toks) {
 }
 
 function start() {
-  items = shuffle(getDictationItems(unit, settings.source));
-  index = 0;
-  firstTryCorrect = 0;
+  queue = createQueue(shuffle(getDictationItems(unit, settings.source)));
   renderItem();
 }
 
@@ -141,19 +137,13 @@ function bindSettings() {
 
 function renderFinish() {
   audio.playWin();
-  container.innerHTML = finishScreen({
-    icon: '🎧',
-    title: 'Диктант завершён!',
-    correct: firstTryCorrect,
-    total: items.length,
-    restartId: 'dictation-restart',
-  });
+  container.innerHTML = queueFinish({ icon: '🎧', title: 'Диктант завершён!', q: queue, restartId: 'dictation-restart' });
   container.querySelector('#dictation-restart')?.addEventListener('click', start);
 }
 
 function renderItem() {
   if (!container) return;
-  if (!items.length) {
+  if (!queue.total) {
     // Выбранного источника в уроке нет — переключаемся на другой
     const other = settings.source === 'text' ? 'sentences' : 'text';
     if (getDictationItems(unit, other).length) {
@@ -162,12 +152,12 @@ function renderItem() {
     }
     return;
   }
-  if (index >= items.length) {
+  if (queue.done) {
     renderFinish();
     return;
   }
 
-  const item = items[index];
+  const item = queue.current;
   checked = false;
   tokens = tokenize(item.target);
   const gapIdx = new Set(pickGaps(tokens));
@@ -187,7 +177,7 @@ function renderItem() {
 
   container.innerHTML = `
     <div class="exercise">
-      ${exerciseHeader('Диктант на слух', index, items.length)}
+      ${queueHeader('Диктант на слух', queue)}
       ${settingsHtml()}
       <div class="prompt">
         <h1 class="prompt-title" style="font-size:1.35rem">Прослушайте и впишите пропущенные слова</h1>
@@ -239,13 +229,13 @@ function renderItem() {
   gaps[0]?.input?.focus();
   lastFocused = gaps[0]?.input || null;
   setTimeout(() => {
-    if (container && items[index] === item) listen();
+    if (container && queue?.current === item) listen();
   }, 300);
 }
 
 function listen(slow = false) {
   if (!container || !unit) return;
-  const item = items[index];
+  const item = queue?.current;
   if (!item) return;
   const btn = container?.querySelector(slow ? '#dict-listen-slow' : '#dict-listen');
   playWithButton(audio, btn, item.audio, item.target, unit.lang, slow ? { rate: 0.7 } : {});
@@ -292,7 +282,7 @@ function gradeGap(value, answer) {
 function check() {
   if (checked) return;
   checked = true;
-  const item = items[index];
+  const item = queue.current;
 
   let okCount = 0;
   let almostCount = 0;
@@ -311,7 +301,7 @@ function check() {
 
   const allCorrect = okCount === gaps.length;
   state.recordAnswer(unit.id, allCorrect, item.key);
-  if (allCorrect) firstTryCorrect += 1;
+  lastCorrect = allCorrect;
 
   const feedback = container.querySelector('#dict-feedback');
   const fullText = `<span lang="${escapeHtml(unit.lang)}">${escapeHtml(item.target)}</span>`;
@@ -320,10 +310,10 @@ function check() {
     showFeedback(feedback, 'success', 'Отлично, всё верно!', item.ru ? escapeHtml(item.ru) : '');
   } else if (almostCount && okCount + almostCount === gaps.length) {
     audio.playMistake();
-    showFeedback(feedback, 'warning', 'Почти! Есть опечатки — сравните с правильным написанием.', fullText);
+    showFeedback(feedback, 'warning', 'Почти! Есть опечатки — сравните с правильным написанием. 🔁 Фраза вернётся позже.', fullText);
   } else {
     audio.playMistake();
-    showFeedback(feedback, 'error', `Верно ${okCount} из ${gaps.length}`, fullText);
+    showFeedback(feedback, 'error', `Верно ${okCount} из ${gaps.length} · 🔁 фраза вернётся позже`, fullText);
   }
 
   container.querySelector('#dict-check').hidden = true;
@@ -336,7 +326,7 @@ function check() {
 function next() {
   audio.playClick();
   audio.stopSpeech();
-  index += 1;
+  queue.resolve(lastCorrect);
   renderItem();
 }
 
@@ -357,7 +347,7 @@ function onGapKeyDown(e) {
 }
 
 function onKeyDown(e) {
-  if (!container || isModalOpen() || index >= items.length) return;
+  if (!container || isModalOpen() || !queue || queue.done) return;
   if (e.ctrlKey && e.code === 'Space') {
     e.preventDefault();
     listen();

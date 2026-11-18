@@ -2113,3 +2113,27 @@ kbd {
     transition: none !important;
   }
 }
+
+/* Очередь повторений */
+.exercise-counter {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+
+.counter-sep {
+  color: var(--text-3);
+  margin: 0 2px;
+}
+
+.repeat-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: var(--warning-soft);
+  color: var(--warning);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.75rem;
+}

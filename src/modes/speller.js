@@ -1,13 +1,12 @@
 import { state } from '../core/state.js';
 import { audio } from '../core/audio.js';
 import { createBoard } from '../core/board.js';
+import { createQueue, queueHeader, queueFinish } from '../core/queue.js';
 import {
   escapeHtml,
   shuffle,
   isTypingTarget,
   isModalOpen,
-  exerciseHeader,
-  finishScreen,
   listenButton,
   playWithButton,
   showFeedback,
@@ -20,11 +19,10 @@ let container = null;
 /** Enter/Пробел на кнопке внутри упражнения сработает как клик — не дублируем. */
 const isOwnButton = (e) => e.target instanceof HTMLButtonElement && Boolean(container?.contains(e.target));
 let unit = null;
-let questions = [];
-let index = 0;
+let queue = null;
+let lastCorrect = false;
 let board = null;
 let checked = false;
-let firstTryCorrect = 0;
 let targetLetters = [];
 
 const compact = (s) => String(s || '').replace(/\s+/g, '').toLowerCase();
@@ -36,31 +34,24 @@ function parseDistractors(q) {
 }
 
 function start() {
-  questions = shuffle(unit.words || []);
-  index = 0;
-  firstTryCorrect = 0;
+  queue = createQueue(shuffle(unit.words || []));
   renderWord();
 }
 
 function renderFinish() {
   audio.playWin();
-  container.innerHTML = finishScreen({
-    title: 'Все слова собраны!',
-    correct: firstTryCorrect,
-    total: questions.length,
-    restartId: 'speller-restart',
-  });
+  container.innerHTML = queueFinish({ title: 'Все слова собраны!', q: queue, restartId: 'speller-restart' });
   container.querySelector('#speller-restart')?.addEventListener('click', start);
 }
 
 function renderWord() {
   if (!container) return;
-  if (index >= questions.length) {
+  if (queue.done) {
     renderFinish();
     return;
   }
 
-  const q = questions[index];
+  const q = queue.current;
   checked = false;
   // Пробелы в многословных словах (напр. «von Beruf») не собираются — сравниваем без них
   targetLetters = [...String(q.target || '').replace(/\s+/g, '')];
@@ -68,7 +59,7 @@ function renderWord() {
 
   container.innerHTML = `
     <div class="exercise">
-      ${exerciseHeader('Соберите слово по буквам', index, questions.length)}
+      ${queueHeader('Соберите слово по буквам', queue)}
       <div class="prompt">
         <h1 class="prompt-title">${escapeHtml(q.ru || 'Соберите услышанное слово')}</h1>
         ${q.transcript ? `<div class="prompt-sub">${escapeHtml(q.transcript)}</div>` : ''}
@@ -105,25 +96,25 @@ function renderWord() {
   container.querySelector('#speller-clear').addEventListener('click', () => board.clear());
   checkBtn.addEventListener('click', check);
   container.querySelector('#speller-next').addEventListener('click', next);
-  if (!q.ru) setTimeout(() => container && questions[index] === q && listen(), 300);
+  if (!q.ru) setTimeout(() => container && queue?.current === q && listen(), 300);
 }
 
 function listen() {
   if (!container || !unit) return;
-  const q = questions[index];
+  const q = queue?.current;
   if (!q) return;
   playWithButton(audio, container?.querySelector('#speller-listen'), q.audio, q.target, unit.lang);
 }
 
 function check() {
   if (checked || !board?.selected.length) return;
-  const q = questions[index];
+  const q = queue.current;
   const assembled = board.selected.map((l) => l.text).join('');
   const isCorrect = compact(assembled) === compact(q.target);
   checked = true;
 
   state.recordAnswer(unit.id, isCorrect, `speller:${q.id}`);
-  if (isCorrect) firstTryCorrect += 1;
+  lastCorrect = isCorrect;
 
   board.lock();
   board.setZoneState(isCorrect ? 'success' : 'error');
@@ -133,7 +124,7 @@ function check() {
     showFeedback(feedback, 'success', 'Верно!', escapeHtml(q.target));
   } else {
     audio.playMistake();
-    showFeedback(feedback, 'error', `Правильное написание: <strong>${escapeHtml(q.target)}</strong>`, `Ваш вариант: ${escapeHtml(assembled)}`);
+    showFeedback(feedback, 'error', `Правильное написание: <strong>${escapeHtml(q.target)}</strong>`, `Ваш вариант: ${escapeHtml(assembled)} · 🔁 слово вернётся позже`);
   }
 
   container.querySelector('#speller-check').hidden = true;
@@ -147,14 +138,14 @@ function check() {
 function next() {
   audio.playClick();
   audio.stopSpeech();
-  index += 1;
+  queue.resolve(lastCorrect);
   renderWord();
 }
 
 function onKeyDown(e) {
   // Не перехватываем клавиши в полях ввода (например, в окне настроек)
   if (!container || isModalOpen() || isTypingTarget(e.target) || e.ctrlKey || e.metaKey || e.altKey) return;
-  if (index >= questions.length) return;
+  if (!queue || queue.done) return;
 
   if (e.key === 'Enter') {
     if (isOwnButton(e)) return;

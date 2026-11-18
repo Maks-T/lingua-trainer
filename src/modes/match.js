@@ -1,7 +1,8 @@
 import { state } from '../core/state.js';
 import { audio } from '../core/audio.js';
 import { getMatchWords } from '../core/exercises.js';
-import { escapeHtml, shuffle, exerciseHeader, finishScreen, emptyState, isModalOpen, isTypingTarget } from '../core/utils.js';
+import { escapeHtml, shuffle, emptyState, isModalOpen, isTypingTarget } from '../core/utils.js';
+import { queueFinish } from '../core/queue.js';
 
 const ROUND_SIZE = 6;
 const SETTINGS_KEY = 'lingua_match_side';
@@ -12,9 +13,12 @@ let rounds = [];
 let roundIndex = 0;
 let selected = null; // { side: 'left' | 'right', id }
 let matched = new Set();
-let missed = new Set();
+let everMissed = new Set(); // слова, в которых хоть раз ошиблись
+let roundMistakes = new Set();
 let firstTryCorrect = 0;
+let mistakesCount = 0;
 let total = 0;
+let allWords = [];
 let side = loadSide(); // 'ru' | 'definition'
 let busy = false;
 
@@ -43,20 +47,22 @@ function start() {
   if (rounds.length > 1 && last.length < 3) {
     rounds[rounds.length - 2].push(...rounds.pop());
   }
+  rounds = rounds.map((words) => ({ words, repeat: false }));
+  allWords = words;
   total = words.length;
   roundIndex = 0;
   firstTryCorrect = 0;
-  missed = new Set();
+  mistakesCount = 0;
+  everMissed = new Set();
   renderRound();
 }
 
 function renderFinish() {
   audio.playWin();
-  container.innerHTML = finishScreen({
+  container.innerHTML = queueFinish({
     icon: '🔗',
     title: 'Все пары найдены!',
-    correct: firstTryCorrect,
-    total,
+    q: { total, firstTry: firstTryCorrect, mistakes: mistakesCount },
     restartId: 'match-restart',
   });
   container.querySelector('#match-restart')?.addEventListener('click', start);
@@ -75,15 +81,22 @@ function renderRound() {
     return;
   }
 
-  const words = rounds[roundIndex];
+  const { words, repeat } = rounds[roundIndex];
   matched = new Set();
+  roundMistakes = new Set();
   selected = null;
   busy = false;
-  const doneBefore = rounds.slice(0, roundIndex).reduce((n, r) => n + r.length, 0);
 
   container.innerHTML = `
     <div class="exercise">
-      ${exerciseHeader(`Раунд ${roundIndex + 1} из ${rounds.length}`, doneBefore, total)}
+      <div class="exercise-head">
+        <span class="exercise-kicker">Раунд ${roundIndex + 1} из ${rounds.length}${repeat ? ' <span class="repeat-badge">🔁 повтор ошибок</span>' : ''}</span>
+        <span class="exercise-counter">
+          <span class="text-success">✓ ${firstTryCorrect}</span> из ${total}
+          <span class="counter-sep">·</span> <span class="text-danger">✕ ${mistakesCount}</span>
+        </span>
+      </div>
+      <div class="exercise-progress"><span style="width:${Math.round((roundIndex / rounds.length) * 100)}%"></span></div>
       <div class="prompt">
         <h1 class="prompt-title" style="font-size:1.35rem">Соедините слово с ${side === 'definition' ? 'определением' : 'переводом'}</h1>
         <div class="prompt-hint">Нажмите на карточку слева, затем на подходящую справа (или наоборот).</div>
@@ -127,7 +140,7 @@ function pick(btn) {
   if (busy || btn.classList.contains('done')) return;
   const which = btn.dataset.side;
   const id = btn.dataset.id;
-  const word = rounds[roundIndex].find((w) => w.id === id);
+  const word = rounds[roundIndex].words.find((w) => w.id === id);
 
   if (which === 'left') {
     audio.playSpeech(word.audio, null, null, word.target, unit.lang);
@@ -154,22 +167,25 @@ function pick(btn) {
     leftEl.classList.add('done');
     rightEl.classList.add('done');
     matched.add(leftId);
-    if (!missed.has(leftId)) {
-      firstTryCorrect += 1;
+    const isFiller = rounds[roundIndex].words.find((w) => w.id === leftId)?.filler;
+    if (!roundMistakes.has(leftId) && !isFiller) {
+      if (!everMissed.has(leftId)) firstTryCorrect += 1;
       state.recordAnswer(unit.id, true, `match:${leftId}`);
     }
     audio.playSuccess();
-    if (matched.size === rounds[roundIndex].length) {
+    if (matched.size === rounds[roundIndex].words.length) {
       busy = true;
+      queueRepeatRound();
       setTimeout(() => {
         roundIndex += 1;
         renderRound();
       }, 700);
     }
   } else {
-    // Ошибка засчитывается слову слева один раз за серию
-    if (!missed.has(leftId)) {
-      missed.add(leftId);
+    // Ошибка засчитывается слову слева один раз за раунд
+    if (!roundMistakes.has(leftId)) {
+      roundMistakes.add(leftId);
+      mistakesCount += 1;
       state.recordAnswer(unit.id, false);
     }
     audio.playMistake();
@@ -184,6 +200,19 @@ function pick(btn) {
       busy = false;
     }, 500);
   }
+}
+
+/** Слова с ошибками в этом раунде уходят в отдельный раунд повторения в конце. */
+function queueRepeatRound() {
+  const current = rounds[roundIndex].words;
+  const toRepeat = current.filter((w) => roundMistakes.has(w.id) && !w.filler);
+  if (!toRepeat.length) return;
+  toRepeat.forEach((w) => everMissed.add(w.id));
+  // Для выбора нужно хотя бы 3 пары — добавляем уже выученные слова как «наполнитель»
+  const fillers = shuffle(allWords.filter((w) => !toRepeat.includes(w)))
+    .slice(0, Math.max(0, 3 - toRepeat.length))
+    .map((w) => ({ ...w, filler: true }));
+  rounds.push({ words: [...toRepeat.map((w) => ({ ...w, filler: false })), ...fillers], repeat: true });
 }
 
 function onKeyDown(e) {

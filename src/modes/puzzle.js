@@ -1,6 +1,7 @@
 import { state } from '../core/state.js';
 import { audio } from '../core/audio.js';
 import { createBoard } from '../core/board.js';
+import { createQueue, queueHeader, queueFinish } from '../core/queue.js';
 import {
   escapeHtml,
   shuffle,
@@ -8,8 +9,6 @@ import {
   normalizeWord,
   isTypingTarget,
   isModalOpen,
-  exerciseHeader,
-  finishScreen,
   listenButton,
   playWithButton,
   showFeedback,
@@ -22,11 +21,10 @@ let container = null;
 /** Enter/Пробел на кнопке внутри упражнения сработает как клик — не дублируем. */
 const isOwnButton = (e) => e.target instanceof HTMLButtonElement && Boolean(container?.contains(e.target));
 let unit = null;
-let questions = [];
-let index = 0;
+let queue = null;
+let lastCorrect = false;
 let board = null;
 let checked = false;
-let firstTryCorrect = 0;
 
 function colorClass(text) {
   const clean = normalizeWord(text);
@@ -43,31 +41,24 @@ function parseDistractors(q) {
 }
 
 function start() {
-  questions = shuffle(unit.sentences || []);
-  index = 0;
-  firstTryCorrect = 0;
+  queue = createQueue(shuffle(unit.sentences || []));
   renderQuestion();
 }
 
 function renderFinish() {
   audio.playWin();
-  container.innerHTML = finishScreen({
-    title: 'Все предложения собраны!',
-    correct: firstTryCorrect,
-    total: questions.length,
-    restartId: 'puzzle-restart',
-  });
+  container.innerHTML = queueFinish({ title: 'Все предложения собраны!', q: queue, restartId: 'puzzle-restart' });
   container.querySelector('#puzzle-restart')?.addEventListener('click', start);
 }
 
 function renderQuestion() {
   if (!container) return;
-  if (index >= questions.length) {
+  if (queue.done) {
     renderFinish();
     return;
   }
 
-  const q = questions[index];
+  const q = queue.current;
   checked = false;
   const targetWords = (q.target || '').split(/\s+/).filter(Boolean);
   const distractors = parseDistractors(q).filter(
@@ -77,7 +68,7 @@ function renderQuestion() {
 
   container.innerHTML = `
     <div class="exercise">
-      ${exerciseHeader('Соберите предложение', index, questions.length)}
+      ${queueHeader('Соберите предложение', queue)}
       <div class="prompt">
         <h1 class="prompt-title">${escapeHtml(q.ru || 'Соберите услышанную фразу')}</h1>
         ${q.transcript ? `<div class="prompt-sub">${escapeHtml(q.transcript)}</div>` : ''}
@@ -116,25 +107,25 @@ function renderQuestion() {
   container.querySelector('#puzzle-clear').addEventListener('click', () => board.clear());
   checkBtn.addEventListener('click', check);
   container.querySelector('#puzzle-next').addEventListener('click', next);
-  if (!q.ru) setTimeout(() => container && questions[index] === q && listen(), 300);
+  if (!q.ru) setTimeout(() => container && queue?.current === q && listen(), 300);
 }
 
 function listen() {
   if (!container || !unit) return;
-  const q = questions[index];
+  const q = queue?.current;
   if (!q) return;
   playWithButton(audio, container?.querySelector('#puzzle-listen'), q.audio, q.target, unit.lang);
 }
 
 function check() {
   if (checked || !board?.selected.length) return;
-  const q = questions[index];
+  const q = queue.current;
   const assembled = board.selected.map((w) => w.text).join(' ');
   const isCorrect = normalizePhrase(assembled) === normalizePhrase(q.target);
   checked = true;
 
   state.recordAnswer(unit.id, isCorrect, `puzzle:${q.id}`);
-  if (isCorrect) firstTryCorrect += 1;
+  lastCorrect = isCorrect;
 
   board.lock();
   board.setZoneState(isCorrect ? 'success' : 'error');
@@ -144,7 +135,7 @@ function check() {
     showFeedback(feedback, 'success', 'Правильно!', escapeHtml(q.target));
   } else {
     audio.playMistake();
-    showFeedback(feedback, 'error', `Правильно: <strong>${escapeHtml(q.target)}</strong>`, `Ваш ответ: ${escapeHtml(assembled)}`);
+    showFeedback(feedback, 'error', `Правильно: <strong>${escapeHtml(q.target)}</strong>`, `Ваш ответ: ${escapeHtml(assembled)} · 🔁 это предложение вернётся позже`);
   }
 
   container.querySelector('#puzzle-check').hidden = true;
@@ -158,13 +149,13 @@ function check() {
 function next() {
   audio.playClick();
   audio.stopSpeech();
-  index += 1;
+  queue.resolve(lastCorrect);
   renderQuestion();
 }
 
 function onKeyDown(e) {
   if (!container || isModalOpen() || isTypingTarget(e.target) || e.ctrlKey || e.metaKey || e.altKey) return;
-  if (index >= questions.length) return;
+  if (!queue || queue.done) return;
   if (e.key === 'Enter') {
     // Enter на сфокусированной кнопке сработает как клик — не дублируем
     if (isOwnButton(e)) return;

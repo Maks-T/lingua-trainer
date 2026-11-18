@@ -1,13 +1,12 @@
 import { state } from '../core/state.js';
 import { audio } from '../core/audio.js';
 import { getQuizItems } from '../core/exercises.js';
+import { createQueue, queueHeader, queueFinish } from '../core/queue.js';
 import {
   escapeHtml,
   shuffle,
   isTypingTarget,
   isModalOpen,
-  exerciseHeader,
-  finishScreen,
   listenButton,
   playWithButton,
   showFeedback,
@@ -22,27 +21,19 @@ let container = null;
 /** Enter/Пробел на кнопке внутри упражнения сработает как клик — не дублируем. */
 const isOwnButton = (e) => e.target instanceof HTMLButtonElement && Boolean(container?.contains(e.target));
 let unit = null;
-let items = [];
-let index = 0;
+let queue = null;
+let lastCorrect = false;
 let answered = false;
 let options = [];
-let firstTryCorrect = 0;
 
 function start() {
-  items = shuffle(getQuizItems(unit));
-  index = 0;
-  firstTryCorrect = 0;
+  queue = createQueue(shuffle(getQuizItems(unit)));
   renderQuestion();
 }
 
 function renderFinish() {
   audio.playWin();
-  container.innerHTML = finishScreen({
-    title: 'Вопросы пройдены!',
-    correct: firstTryCorrect,
-    total: items.length,
-    restartId: 'quiz-restart',
-  });
+  container.innerHTML = queueFinish({ title: 'Вопросы пройдены!', q: queue, restartId: 'quiz-restart' });
   container.querySelector('#quiz-restart')?.addEventListener('click', start);
 }
 
@@ -68,12 +59,12 @@ function refSnippet(item) {
 
 function renderQuestion() {
   if (!container) return;
-  if (index >= items.length) {
+  if (queue.done) {
     renderFinish();
     return;
   }
 
-  const item = items[index];
+  const item = queue.current;
   answered = false;
   options = shuffle([...new Set(item.options)]);
   const kicker =
@@ -82,7 +73,7 @@ function renderQuestion() {
 
   container.innerHTML = `
     <div class="exercise">
-      ${exerciseHeader(kicker, index, items.length)}
+      ${queueHeader(kicker, queue)}
       <div class="prompt">
         <h1 class="prompt-title" lang="${escapeHtml(unit.lang)}">${escapeHtml(item.question)}</h1>
         ${
@@ -130,7 +121,7 @@ function renderQuestion() {
 
 function listen() {
   if (!container || !unit) return;
-  const item = items[index];
+  const item = queue?.current;
   if (!item?.speakText) return;
   playWithButton(audio, container?.querySelector('#quiz-listen'), item.audio, item.speakText, unit.lang);
 }
@@ -138,12 +129,12 @@ function listen() {
 function choose(optIndex) {
   if (answered || !options[optIndex]) return;
   answered = true;
-  const item = items[index];
+  const item = queue.current;
   const chosen = options[optIndex];
   const isCorrect = chosen === item.answer;
 
   state.recordAnswer(unit.id, isCorrect, item.key);
-  if (isCorrect) firstTryCorrect += 1;
+  lastCorrect = isCorrect;
 
   container.querySelectorAll('.quiz-option').forEach((btn) => {
     const opt = options[Number(btn.dataset.index)];
@@ -159,7 +150,7 @@ function choose(optIndex) {
     showFeedback(feedback, 'success', 'Верно!');
   } else {
     audio.playMistake();
-    showFeedback(feedback, 'error', `Правильный ответ: <strong>${escapeHtml(item.answer)}</strong>`);
+    showFeedback(feedback, 'error', `Правильный ответ: <strong>${escapeHtml(item.answer)}</strong>`, '🔁 вопрос вернётся позже');
   }
   container.querySelector('#quiz-ref').innerHTML = refSnippet(item);
 
@@ -177,13 +168,13 @@ function choose(optIndex) {
 function next() {
   audio.playClick();
   audio.stopSpeech();
-  index += 1;
+  queue.resolve(lastCorrect);
   renderQuestion();
 }
 
 function onKeyDown(e) {
   if (!container || isModalOpen() || isTypingTarget(e.target) || e.ctrlKey || e.metaKey || e.altKey) return;
-  if (index >= items.length) return;
+  if (!queue || queue.done) return;
 
   if (/^[1-9]$/.test(e.key) && !answered) {
     e.preventDefault();
