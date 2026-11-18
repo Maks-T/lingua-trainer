@@ -71,8 +71,10 @@ export function isTypingTarget(target) {
 
 /** Открыто ли модальное окно (тогда хоткеи упражнений отключаются). */
 export function isModalOpen() {
-  const modal = document.getElementById('settings-modal');
-  return Boolean(modal && !modal.hidden);
+  return ['settings-modal', 'video-modal'].some((id) => {
+    const modal = document.getElementById(id);
+    return Boolean(modal && !modal.hidden);
+  });
 }
 
 export function toast(message, type = 'info', timeout = 3200) {
@@ -182,4 +184,41 @@ export function levenshtein(a, b) {
     prev = cur;
   }
   return prev[b.length];
+}
+
+/**
+ * Достаёт id ролика и время старта из ссылки YouTube
+ * (watch?v=, youtu.be/, embed/, shorts/, live/; параметр t= / start=).
+ */
+export function parseYouTube(input) {
+  if (!input) return null;
+  if (typeof input === 'object') {
+    return input.youtube ? { id: input.youtube, start: Number(input.start) || 0, title: input.title || '' } : parseYouTube(input.url);
+  }
+  const raw = String(input).trim();
+  if (/^[\w-]{11}$/.test(raw)) return { id: raw, start: 0, title: '' };
+  let url;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  let id = null;
+  if (url.hostname.includes('youtu.be')) id = url.pathname.slice(1).split('/')[0];
+  else if (url.hostname.includes('youtube')) {
+    id = url.searchParams.get('v') || url.pathname.match(/\/(?:embed|shorts|live)\/([\w-]{11})/)?.[1] || null;
+  }
+  if (!id || !/^[\w-]{11}$/.test(id)) return null;
+  const t = url.searchParams.get('t') || url.searchParams.get('start') || '0';
+  const m = t.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/);
+  const start = m ? (Number(m[1]) || 0) * 3600 + (Number(m[2]) || 0) * 60 + (Number(m[3]) || 0) : 0;
+  return { id, start, title: '' };
+}
+
+/** Видео урока: поле video или source.url. */
+export function getUnitVideo(unit) {
+  if (!unit) return null;
+  const video = parseYouTube(unit.video) || parseYouTube(unit.source?.url);
+  if (!video) return null;
+  return { ...video, title: video.title || unit.video?.title || unit.source?.title || unit.title || '' };
 }

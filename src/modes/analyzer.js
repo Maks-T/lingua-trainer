@@ -1,6 +1,6 @@
 import { audio } from '../core/audio.js';
 import { state } from '../core/state.js';
-import { escapeHtml, tokenize, normalizeWord, shuffle, toast } from '../core/utils.js';
+import { escapeHtml, tokenize, normalizeWord, shuffle, toast, parseYouTube } from '../core/utils.js';
 
 let container = null;
 let currentUnit = null;
@@ -86,9 +86,10 @@ export function mountAnalyzer(target, unit) {
           </div>
           <h3 class="section-heading" style="margin-top:18px">Сохранить как урок</h3>
           <p class="muted">Зона: <strong>${escapeHtml(track?.title || 'не выбрана')}</strong>. Из текста будут созданы задания для всех режимов.</p>
-          <form class="save-form" id="save-form">
+          <form class="save-form" id="save-form" style="flex-direction:column">
             <input type="text" class="input-control" id="unit-title" maxlength="80" placeholder="Название урока" required />
-            <button type="submit" class="btn btn-primary" style="min-width:0" ${track ? '' : 'disabled'}>Сохранить</button>
+            <input type="url" class="input-control" id="unit-video" placeholder="Ссылка на YouTube (необязательно)" />
+            <button type="submit" class="btn btn-primary" style="min-width:0; align-self:flex-start" ${track ? '' : 'disabled'}>Сохранить урок</button>
           </form>
         </div>
       </div>
@@ -168,7 +169,7 @@ async function showVerbs() {
   }
 }
 
-function buildUnit(text, title) {
+function buildUnit(text, title, videoUrl = '') {
   const lang = getLang();
   const sentences = splitSentences(text);
   const keywords = keywordFrequency(text).slice(0, 15);
@@ -207,6 +208,7 @@ function buildUnit(text, title) {
         return { id: `s${idx + 1}`, target: s, ru: '', distractorWords: distractors, audio: '' };
       }),
     colors: [],
+    ...(parseYouTube(videoUrl) ? { video: { youtube: parseYouTube(videoUrl).id, start: parseYouTube(videoUrl).start, title } } : {}),
   };
 }
 
@@ -220,7 +222,12 @@ function saveAsUnit() {
   const track = state.getActiveTrack();
   if (!track) return toast('Сначала создайте учебную зону в настройках', 'error');
 
-  const unit = buildUnit(text, title);
+  const videoUrl = container.querySelector('#unit-video').value.trim();
+  if (videoUrl && !parseYouTube(videoUrl)) {
+    toast('Не удалось распознать ссылку на YouTube', 'error');
+    return container.querySelector('#unit-video').focus();
+  }
+  const unit = buildUnit(text, title, videoUrl);
   if (!unit.text.length) return toast('В тексте не найдено предложений', 'error');
 
   audio.playSuccess();
@@ -233,7 +240,7 @@ async function exportJson() {
   const text = getText();
   if (!text) return toast('Вставьте текст для экспорта');
   const title = container.querySelector('#unit-title').value.trim() || 'Пользовательский урок';
-  const json = JSON.stringify(buildUnit(text, title), null, 2);
+  const json = JSON.stringify(buildUnit(text, title, container.querySelector('#unit-video').value.trim()), null, 2);
   try {
     await navigator.clipboard.writeText(json);
     audio.playSuccess();

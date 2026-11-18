@@ -1,5 +1,6 @@
 import { audio } from '../core/audio.js';
-import { escapeHtml, tokenize, normalizeWord, emptyState, ICONS } from '../core/utils.js';
+import { escapeHtml, tokenize, normalizeWord, emptyState, ICONS, getUnitVideo } from '../core/utils.js';
+import { openVideoModal } from '../core/video.js';
 
 let container = null;
 let unit = null;
@@ -123,6 +124,7 @@ export function mountReader(target, unitData) {
       <div class="reader-toolbar">
         <h2 class="reader-title">${escapeHtml(unit.title || 'Текст урока')}</h2>
         <div style="display:flex; gap:8px; flex-wrap:wrap">
+          ${getUnitVideo(unit) ? '<button type="button" class="btn btn-secondary btn-small" id="reader-video">🎬 Смотреть видео</button>' : ''}
           <button type="button" class="btn btn-secondary btn-small" id="reader-toggle-ru">Скрыть перевод</button>
           <button type="button" class="btn btn-primary btn-small" id="reader-play-all" style="min-width:0"></button>
         </div>
@@ -156,6 +158,11 @@ export function mountReader(target, unitData) {
   container.querySelector('#reader-play-all').addEventListener('click', () => {
     if (isPlayingAll) stopPlayback();
     else playAll(0);
+  });
+
+  container.querySelector('#reader-video')?.addEventListener('click', () => {
+    if (isPlayingAll) stopPlayback();
+    openVideoModal(getUnitVideo(unit));
   });
 
   container.querySelector('#reader-toggle-ru').addEventListener('click', (e) => {

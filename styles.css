@@ -630,6 +630,91 @@ kbd {
   margin-right: 4px;
 }
 
+/* Видео урока */
+.video-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface-3);
+}
+
+.video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s;
+}
+
+.video-thumb:hover img {
+  transform: scale(1.04);
+}
+
+.video-play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 60px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(220, 30, 30, 0.92);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s;
+}
+
+.video-thumb:hover .video-play {
+  transform: scale(1.08);
+}
+
+.video-play svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.video-card-title {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.modal-window.video-window {
+  max-width: min(1000px, 94vw);
+}
+
+#video-open-yt {
+  text-decoration: none;
+}
+
+.video-window .modal-title {
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 /* =========================================================
    Общие элементы упражнений
    ========================================================= */
@@ -1936,6 +2021,10 @@ kbd {
   }
 
   .hint-card {
+    display: none;
+  }
+
+  #video-open-yt {
     display: none;
   }
 

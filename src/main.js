@@ -2,7 +2,8 @@ import { state } from './core/state.js';
 import { audio } from './core/audio.js';
 import { catalogLoader } from './core/catalog.js';
 import { getAllExerciseKeys } from './core/exercises.js';
-import { escapeHtml, emptyState, toast } from './core/utils.js';
+import { escapeHtml, emptyState, toast, getUnitVideo } from './core/utils.js';
+import { initVideoModal, openVideoModal, thumbnailUrl } from './core/video.js';
 import { mountPuzzle, destroyPuzzle } from './modes/puzzle.js';
 import { mountSpeller, destroySpeller } from './modes/speller.js';
 import { mountQuiz, destroyQuiz } from './modes/quiz.js';
@@ -212,6 +213,16 @@ function renderMotto() {
   card.dataset.lang = lang;
   document.getElementById('motto-target').textContent = motto?.target || 'Lingua Studio';
   document.getElementById('motto-ru').textContent = motto?.ru || 'Немного практики каждый день.';
+}
+
+function renderVideoCard() {
+  const card = document.getElementById('video-card');
+  if (!card) return;
+  const video = getUnitVideo(state.activeUnit);
+  card.hidden = !video;
+  if (!video) return;
+  document.getElementById('video-thumb-img').src = thumbnailUrl(video);
+  document.getElementById('video-card-title').textContent = video.title;
 }
 
 function renderHints() {
@@ -474,6 +485,10 @@ function initEventHandlers() {
   });
 
   document.getElementById('btn-share')?.addEventListener('click', shareLesson);
+  document.getElementById('btn-open-video')?.addEventListener('click', () => {
+    openVideoModal(getUnitVideo(state.activeUnit));
+  });
+  initVideoModal();
 
   document.getElementById('btn-delete-unit')?.addEventListener('click', () => {
     const track = state.getActiveTrack();
@@ -582,6 +597,7 @@ function subscribeToState() {
       case 'UNIT_LOADED':
         renderLessonProgress();
         renderMotto();
+        renderVideoCard();
         remountMode();
         syncUrl();
         break;

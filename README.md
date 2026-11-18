@@ -60,6 +60,14 @@ pnpm build        # сборка в dist/
 
 `ref` — id абзаца из `text`, который подсвечивается после ответа.
 
+Видео урока (YouTube) — показывается в боковой панели и в «Умном ридере», открывается во встроенном плеере:
+
+```json
+"video": { "youtube": "iKHTawgyKWQ", "start": 0, "title": "Larry Smith: Why you will fail to have a great career" }
+```
+
+Для своих уроков ссылку на YouTube можно указать при сохранении в «Текст-лаборатории».
+
 ## Озвучка
 
 ```bash
