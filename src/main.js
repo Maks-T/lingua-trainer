@@ -83,6 +83,55 @@ let currentModeName = null;
 let loadRequestId = 0;
 
 /* ---------------------------------------------------------
+   Ссылки: ?profile=dad&course=en-b1&unit=en-b1-ted-smith&mode=quiz
+   --------------------------------------------------------- */
+function readRoute() {
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get('mode');
+  return {
+    profile: params.get('profile') || undefined,
+    course: params.get('course') || undefined,
+    unit: params.get('unit') || undefined,
+    mode: mode && MODE_HANDLERS[mode] ? mode : undefined,
+  };
+}
+
+function buildShareUrl() {
+  const params = new URLSearchParams();
+  params.set('profile', state.currentProfileId);
+  const track = state.getActiveTrack();
+  if (track) params.set('course', state.getTrackKey(track));
+  if (state.activeUnit?.id) params.set('unit', state.activeUnit.id);
+  params.set('mode', state.activeMode);
+  return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+}
+
+/** Адресная строка всегда показывает текущий профиль → курс → урок → режим. */
+function syncUrl() {
+  const url = buildShareUrl();
+  if (url !== window.location.href) {
+    window.history.replaceState(null, '', url);
+  }
+}
+
+async function shareLesson() {
+  const url = buildShareUrl();
+  const unit = state.activeUnit;
+  const title = unit ? getUnitDisplayTitle(unit) : 'Lingua Studio';
+  try {
+    await navigator.clipboard.writeText(url);
+    toast('Ссылка на урок скопирована', 'success');
+  } catch {
+    // Буфер обмена недоступен (например, не HTTPS) — пробуем системное меню «Поделиться»
+    if (navigator.share) {
+      navigator.share({ title, url }).catch(() => {});
+    } else {
+      window.prompt('Скопируйте ссылку:', url);
+    }
+  }
+}
+
+/* ---------------------------------------------------------
    Шапка: профиль, курс, урок, прогресс
    --------------------------------------------------------- */
 function renderProfileSelect() {
@@ -241,6 +290,7 @@ async function renderUnitSelectAndLoad(targetUnitId = null) {
     if (requestId !== loadRequestId) return;
     state.activeUnit = null;
     renderLessonProgress();
+    syncUrl();
     workspace.innerHTML = emptyState(
       '⚠️',
       'Не удалось загрузить урок',
@@ -423,6 +473,8 @@ function initEventHandlers() {
     renderUnitSelectAndLoad(e.target.value);
   });
 
+  document.getElementById('btn-share')?.addEventListener('click', shareLesson);
+
   document.getElementById('btn-delete-unit')?.addEventListener('click', () => {
     const track = state.getActiveTrack();
     const unit = state.activeUnit;
@@ -531,10 +583,12 @@ function subscribeToState() {
         renderLessonProgress();
         renderMotto();
         remountMode();
+        syncUrl();
         break;
 
       case 'MODE_CHANGED':
         remountMode();
+        syncUrl();
         break;
 
       case 'STATS_UPDATED':
@@ -550,16 +604,18 @@ function subscribeToState() {
 async function bootstrap() {
   initEventHandlers();
   subscribeToState();
+  const route = readRoute();
+  if (route.mode) state.activeMode = route.mode;
   highlightModeTab(state.activeMode);
   renderHints();
 
   try {
     const catalog = await catalogLoader.loadCatalog('data/catalog.json');
-    state.initCatalogData(catalog);
+    state.initCatalogData(catalog, route);
     renderProfileSelect();
     renderTrackSelect();
     renderMotto();
-    await renderUnitSelectAndLoad();
+    await renderUnitSelectAndLoad(route.unit || null);
   } catch (err) {
     const workspace = document.getElementById('app-workspace');
     if (workspace) {

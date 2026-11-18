@@ -347,6 +347,11 @@ svg {
   border-color: var(--danger);
 }
 
+.icon-btn-sm.icon-btn-share:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
 .icon-moon {
   display: none;
 }

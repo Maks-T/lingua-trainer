@@ -61,20 +61,37 @@ class StateManager {
     }
   }
 
-  initCatalogData(catalog) {
+  /**
+   * @param {object} catalog
+   * @param {{profile?: string, course?: string, mode?: string}} route параметры из URL (имеют приоритет над сохранёнными)
+   */
+  initCatalogData(catalog, route = {}) {
     this.catalogProfiles = catalog.profiles || [];
     this.languages = catalog.languages || {};
 
     const allProfiles = this.getProfiles();
+    if (route.profile && allProfiles.some((p) => p.id === route.profile)) {
+      this.currentProfileId = route.profile;
+      this._setItem(STORAGE_KEYS.PROFILE, route.profile);
+    }
     const profileExists = allProfiles.some((p) => p.id === this.currentProfileId);
     if (!profileExists && allProfiles.length > 0) {
       this.currentProfileId = allProfiles[0].id;
     }
 
-    // Восстанавливаем сохраненный трек для профиля
-    const savedTrackId = this._getItem(`${STORAGE_KEYS.ACTIVE_TRACK}_${this.currentProfileId}`);
+    if (route.mode) {
+      this.activeMode = route.mode;
+      this._setItem(STORAGE_KEYS.MODE, route.mode);
+    }
+
+    // Курс из ссылки, иначе — сохранённый трек профиля
     const tracks = this.getTracks(this.currentProfileId);
-    const track = tracks.find((t) => t.id === savedTrackId) || tracks[0];
+    const routeTrack = route.course ? tracks.find((t) => this.getTrackKey(t) === route.course) : null;
+    if (routeTrack) {
+      this._setItem(`${STORAGE_KEYS.ACTIVE_TRACK}_${this.currentProfileId}`, routeTrack.id);
+    }
+    const savedTrackId = this._getItem(`${STORAGE_KEYS.ACTIVE_TRACK}_${this.currentProfileId}`);
+    const track = routeTrack || tracks.find((t) => t.id === savedTrackId) || tracks[0];
     if (track) {
       this.activeTrackId = track.id;
       this.activeDomain = { lang: track.lang, level: track.level || 'custom', trackId: track.id };
@@ -182,6 +199,12 @@ class StateManager {
     // Пользовательские изолированные треки
     const userTracks = this.customTracks[profileId] || [];
     return [...tracks, ...userTracks];
+  }
+
+  /** Короткий ключ курса для ссылок: «en-b1» для курсов каталога, id — для своих зон. */
+  getTrackKey(track) {
+    if (!track) return '';
+    return track.isCustom ? track.id : `${track.lang}-${track.level}`;
   }
 
   getActiveTrack() {
