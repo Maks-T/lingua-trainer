@@ -18,8 +18,8 @@
         }
       })();
     </script>
-    <script type="module" crossorigin src="./assets/index-DLyGaJpK.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-z8GNpMH4.css">
+    <script type="module" crossorigin src="./assets/index-e37RNWun.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-ChWdOqts.css">
   </head>
   <body>
     <div id="app" class="app">
@@ -110,6 +110,15 @@
             </div>
           </section>
 
+          <section class="side-card video-card" id="video-card" hidden>
+            <h3 class="side-card-title">Видео урока</h3>
+            <button type="button" class="video-thumb" id="btn-open-video" aria-label="Смотреть видео урока">
+              <img id="video-thumb-img" alt="" loading="lazy" />
+              <span class="video-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg></span>
+            </button>
+            <div class="video-card-title" id="video-card-title"></div>
+          </section>
+
           <section class="side-card">
             <h3 class="side-card-title">Статистика урока</h3>
             <div class="stats-grid">
@@ -191,6 +200,20 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Модальное окно с видео урока -->
+    <div id="video-modal" class="modal-backdrop" hidden>
+      <div class="modal-window video-window" role="dialog" aria-modal="true" aria-labelledby="video-title">
+        <div class="modal-header">
+          <h2 id="video-title" class="modal-title">Видео урока</h2>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <a id="video-open-yt" class="btn btn-secondary btn-small" href="#" target="_blank" rel="noopener">Открыть на YouTube</a>
+            <button type="button" class="icon-btn" id="btn-close-video" aria-label="Закрыть">✕</button>
+          </div>
+        </div>
+        <div class="video-frame"></div>
       </div>
     </div>
 
