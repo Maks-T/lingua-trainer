@@ -1,219 +1,200 @@
 import { state } from '../core/state.js';
 import { audio } from '../core/audio.js';
+import { createBoard } from '../core/board.js';
+import {
+  escapeHtml,
+  shuffle,
+  normalizePhrase,
+  normalizeWord,
+  isTypingTarget,
+  isModalOpen,
+  exerciseHeader,
+  finishScreen,
+  listenButton,
+  playWithButton,
+  showFeedback,
+  emptyState,
+  ICONS,
+} from '../core/utils.js';
 
-let currentContainer = null;
-let currentUnit = null;
-let currentIndex = 0;
+let container = null;
+
+/** Enter/Пробел на кнопке внутри упражнения сработает как клик — не дублируем. */
+const isOwnButton = (e) => e.target instanceof HTMLButtonElement && Boolean(container?.contains(e.target));
+let unit = null;
 let questions = [];
-let selectedWords = [];
-let bankWords = [];
-let isChecked = false;
+let index = 0;
+let board = null;
+let checked = false;
+let firstTryCorrect = 0;
 
-function normalize(str) {
-  return (str || '')
-    .toLowerCase()
-    .replace(/[\s.,!?;:«»""'’]/g, '');
-}
-
-function getColorClass(word, colors = []) {
-  if (!colors || !colors.length) return '';
-  const clean = normalize(word);
-  for (const group of colors) {
-    if (group.words.some((w) => normalize(w) === clean)) {
-      return `color-${group.color}`;
-    }
+function colorClass(text) {
+  const clean = normalizeWord(text);
+  for (const group of unit?.colors || []) {
+    if (group.words.some((w) => normalizeWord(w) === clean)) return `color-${group.color}`;
   }
   return '';
 }
 
-function renderCurrentQuestion() {
-  if (!currentContainer) return;
+function parseDistractors(q) {
+  if (Array.isArray(q.distractorWords)) return q.distractorWords;
+  if (typeof q.distractorWords === 'string') return q.distractorWords.split(/[\s/]+/).filter(Boolean);
+  return [];
+}
 
-  if (currentIndex >= questions.length) {
-    audio.playWin();
-    currentContainer.innerHTML = `
-      <div class="exercise-wrapper">
-        <div class="feedback-banner show success" style="margin-top: 40px;">
-          🎉 Все предложения урока успешно пройдены!
-        </div>
-        <div class="controls-panel">
-          <button type="button" class="btn-action btn-next" id="puzzle-restart-btn">Пройти заново</button>
-        </div>
-      </div>
-    `;
-    currentContainer.querySelector('#puzzle-restart-btn')?.addEventListener('click', () => {
-      currentIndex = 0;
-      questions = [...(currentUnit.sentences || [])].sort(() => Math.random() - 0.5);
-      renderCurrentQuestion();
-    });
+function start() {
+  questions = shuffle(unit.sentences || []);
+  index = 0;
+  firstTryCorrect = 0;
+  renderQuestion();
+}
+
+function renderFinish() {
+  audio.playWin();
+  container.innerHTML = finishScreen({
+    title: 'Все предложения собраны!',
+    correct: firstTryCorrect,
+    total: questions.length,
+    restartId: 'puzzle-restart',
+  });
+  container.querySelector('#puzzle-restart')?.addEventListener('click', start);
+}
+
+function renderQuestion() {
+  if (!container) return;
+  if (index >= questions.length) {
+    renderFinish();
     return;
   }
 
-  const q = questions[currentIndex];
-  isChecked = false;
-  selectedWords = [];
+  const q = questions[index];
+  checked = false;
+  const targetWords = (q.target || '').split(/\s+/).filter(Boolean);
+  const distractors = parseDistractors(q).filter(
+    (d) => !targetWords.some((t) => normalizeWord(t) === normalizeWord(d))
+  );
+  const items = shuffle([...targetWords, ...distractors]).map((text, i) => ({ id: `w${i}`, text }));
 
-  const targetList = (q.target || '').split(' ').filter(Boolean);
-  let distractors = [];
-  if (Array.isArray(q.distractorWords)) {
-    distractors = q.distractorWords;
-  } else if (typeof q.distractorWords === 'string' && q.distractorWords.trim()) {
-    distractors = q.distractorWords.split(/[\s/]+/).filter(Boolean);
-  }
-
-  const rawBank = [...targetList, ...distractors];
-  bankWords = rawBank
-    .map((word, id) => ({ id: `word-${id}-${word}`, text: word }))
-    .sort(() => Math.random() - 0.5);
-
-  currentContainer.innerHTML = `
-    <div class="exercise-wrapper">
-      <div class="prompt-card">
-        <div class="prompt-ru">${q.ru || ''}</div>
-        ${q.transcript ? `<div class="prompt-transcript">${q.transcript}</div>` : ''}
-        <button type="button" class="audio-btn" id="puzzle-audio-btn" aria-label="Прослушать">🔊</button>
+  container.innerHTML = `
+    <div class="exercise">
+      ${exerciseHeader('Соберите предложение', index, questions.length)}
+      <div class="prompt">
+        <h1 class="prompt-title">${escapeHtml(q.ru || 'Соберите услышанную фразу')}</h1>
+        ${q.transcript ? `<div class="prompt-sub">${escapeHtml(q.transcript)}</div>` : ''}
       </div>
-
-      <div class="board-container">
-        <div class="target-slots" id="puzzle-target-slots" data-placeholder="Нажимайте на слова, чтобы собрать фразу"></div>
-        <div class="source-bank" id="puzzle-source-bank"></div>
-      </div>
-
-      <div class="feedback-banner" id="puzzle-feedback"></div>
-
-      <div class="controls-panel">
-        <button type="button" class="btn-action btn-backspace" id="puzzle-backspace-btn">Стереть</button>
-        <button type="button" class="btn-action btn-check" id="puzzle-check-btn">Проверить</button>
-        <button type="button" class="btn-action btn-next" id="puzzle-next-btn" style="display: none;">Следующий</button>
+      ${listenButton('puzzle-listen')}
+      <div class="drop-zone" id="puzzle-zone" aria-label="Зона сборки предложения"></div>
+      <div class="word-bank" id="puzzle-bank" aria-label="Слова"></div>
+      <div class="feedback" id="puzzle-feedback" role="status"></div>
+      <div class="controls">
+        <button type="button" class="btn btn-secondary" id="puzzle-clear">${ICONS.trash}Очистить</button>
+        <div class="controls-right">
+          <button type="button" class="btn btn-primary" id="puzzle-check" disabled>Проверить ${ICONS.arrow}</button>
+          <button type="button" class="btn btn-primary" id="puzzle-next" hidden>Далее ${ICONS.arrow}</button>
+        </div>
       </div>
     </div>
   `;
 
-  const audioBtn = currentContainer.querySelector('#puzzle-audio-btn');
-  audioBtn?.addEventListener('click', () => {
-    audioBtn.classList.add('playing');
-    audio.playSpeech(q.audio, null, () => audioBtn.classList.remove('playing'), q.target, currentUnit?.lang);
+  const checkBtn = container.querySelector('#puzzle-check');
+  board = createBoard({
+    zoneEl: container.querySelector('#puzzle-zone'),
+    bankEl: container.querySelector('#puzzle-bank'),
+    items,
+    chipClass: (item) => colorClass(item.text),
+    placeholderHtml: `
+      <div class="drop-placeholder">
+        ${ICONS.puzzle}
+        <span>Нажимайте на слова или перетащите их сюда,<br>чтобы составить предложение</span>
+      </div>`,
+    onChange: () => {
+      checkBtn.disabled = board.selected.length === 0;
+    },
   });
 
-  currentContainer.querySelector('#puzzle-backspace-btn')?.addEventListener('click', handleBackspace);
-  currentContainer.querySelector('#puzzle-check-btn')?.addEventListener('click', handleCheck);
-  currentContainer.querySelector('#puzzle-next-btn')?.addEventListener('click', handleNext);
-
-  renderChips();
+  container.querySelector('#puzzle-listen').addEventListener('click', listen);
+  container.querySelector('#puzzle-clear').addEventListener('click', () => board.clear());
+  checkBtn.addEventListener('click', check);
+  container.querySelector('#puzzle-next').addEventListener('click', next);
+  if (!q.ru) setTimeout(() => container && questions[index] === q && listen(), 300);
 }
 
-function renderChips() {
-  if (!currentContainer) return;
-  const targetSlots = currentContainer.querySelector('#puzzle-target-slots');
-  const sourceBank = currentContainer.querySelector('#puzzle-source-bank');
-  if (!targetSlots || !sourceBank) return;
-
-  targetSlots.innerHTML = '';
-  selectedWords.forEach((item, index) => {
-    const chip = document.createElement('div');
-    chip.className = `chip ${getColorClass(item.text, currentUnit.colors)}`;
-    chip.textContent = item.text;
-    if (!isChecked) {
-      chip.addEventListener('click', () => {
-        audio.playClick();
-        selectedWords.splice(index, 1);
-        bankWords.push(item);
-        renderChips();
-      });
-    }
-    targetSlots.appendChild(chip);
-  });
-
-  sourceBank.innerHTML = '';
-  bankWords.forEach((item, index) => {
-    const chip = document.createElement('div');
-    chip.className = `chip ${getColorClass(item.text, currentUnit.colors)}`;
-    chip.textContent = item.text;
-    if (!isChecked) {
-      chip.addEventListener('click', () => {
-        audio.playClick();
-        bankWords.splice(index, 1);
-        selectedWords.push(item);
-        renderChips();
-      });
-    }
-    sourceBank.appendChild(chip);
-  });
+function listen() {
+  if (!container || !unit) return;
+  const q = questions[index];
+  if (!q) return;
+  playWithButton(audio, container?.querySelector('#puzzle-listen'), q.audio, q.target, unit.lang);
 }
 
-function handleBackspace() {
-  if (isChecked || selectedWords.length === 0) return;
-  audio.playClick();
-  const removed = selectedWords.pop();
-  if (removed) {
-    bankWords.push(removed);
-  }
-  renderChips();
-}
+function check() {
+  if (checked || !board?.selected.length) return;
+  const q = questions[index];
+  const assembled = board.selected.map((w) => w.text).join(' ');
+  const isCorrect = normalizePhrase(assembled) === normalizePhrase(q.target);
+  checked = true;
 
-function handleCheck() {
-  if (isChecked) return;
-  const q = questions[currentIndex];
-  const assembledText = selectedWords.map((w) => w.text).join(' ');
-  const isCorrect = normalize(assembledText) === normalize(q.target);
-  const feedback = currentContainer?.querySelector('#puzzle-feedback');
-  const checkBtn = currentContainer?.querySelector('#puzzle-check-btn');
-  const nextBtn = currentContainer?.querySelector('#puzzle-next-btn');
-  const audioBtn = currentContainer?.querySelector('#puzzle-audio-btn');
+  state.recordAnswer(unit.id, isCorrect, `puzzle:${q.id}`);
+  if (isCorrect) firstTryCorrect += 1;
 
-  isChecked = true;
-  state.recordAnswer(currentUnit.id, isCorrect);
-
+  board.lock();
+  board.setZoneState(isCorrect ? 'success' : 'error');
+  const feedback = container.querySelector('#puzzle-feedback');
   if (isCorrect) {
     audio.playSuccess();
-    if (feedback) {
-      feedback.className = 'feedback-banner show success';
-      feedback.textContent = `✓ Правильно: ${q.target}`;
-    }
+    showFeedback(feedback, 'success', 'Правильно!', escapeHtml(q.target));
   } else {
     audio.playMistake();
-    if (feedback) {
-      feedback.className = 'feedback-banner show error';
-      feedback.innerHTML = `✕ Ошибка. Правильно: <strong>${q.target}</strong>`;
-    }
+    showFeedback(feedback, 'error', `Правильно: <strong>${escapeHtml(q.target)}</strong>`, `Ваш ответ: ${escapeHtml(assembled)}`);
   }
 
-  if (q.audio) {
-    audioBtn?.classList.add('playing');
-    audio.playSpeech(q.audio, null, () => audioBtn?.classList.remove('playing'), q.target, currentUnit?.lang);
-  }
-
-  if (checkBtn) checkBtn.style.display = 'none';
-  if (nextBtn) nextBtn.style.display = 'inline-block';
-  renderChips();
+  container.querySelector('#puzzle-check').hidden = true;
+  container.querySelector('#puzzle-clear').disabled = true;
+  const nextBtn = container.querySelector('#puzzle-next');
+  nextBtn.hidden = false;
+  nextBtn.focus();
+  setTimeout(listen, 350);
 }
 
-function handleNext() {
+function next() {
   audio.playClick();
-  currentIndex += 1;
-  renderCurrentQuestion();
+  audio.stopSpeech();
+  index += 1;
+  renderQuestion();
 }
 
-export function mountPuzzle(container, unit) {
-  currentContainer = container;
-  currentUnit = unit;
-  currentIndex = 0;
-  questions = [...(unit.sentences || [])].sort(() => Math.random() - 0.5);
+function onKeyDown(e) {
+  if (!container || isModalOpen() || isTypingTarget(e.target) || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (index >= questions.length) return;
+  if (e.key === 'Enter') {
+    // Enter на сфокусированной кнопке сработает как клик — не дублируем
+    if (isOwnButton(e)) return;
+    e.preventDefault();
+    if (checked) next();
+    else check();
+  } else if (e.key === 'Backspace') {
+    e.preventDefault();
+    board?.pop();
+  } else if (e.key === ' ' && !isOwnButton(e)) {
+    e.preventDefault();
+    listen();
+  }
+}
 
-  if (!questions.length) {
-    container.innerHTML = `
-      <div class="feedback-banner show error" style="margin-top: 20px;">
-        В этом уроке нет предложений для режима пазла.
-      </div>
-    `;
+export function mountPuzzle(target, unitData) {
+  container = target;
+  unit = unitData;
+  if (!unit?.sentences?.length) {
+    container.innerHTML = emptyState('🧩', 'В этом уроке нет предложений для пазла', 'Попробуйте другие режимы.');
     return;
   }
-
-  renderCurrentQuestion();
+  window.addEventListener('keydown', onKeyDown);
+  start();
 }
 
 export function destroyPuzzle() {
+  window.removeEventListener('keydown', onKeyDown);
   audio.stopSpeech();
-  currentContainer = null;
-  currentUnit = null;
+  container = null;
+  unit = null;
+  board = null;
 }

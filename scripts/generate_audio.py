@@ -89,6 +89,14 @@ async def process_unit(unit_path: str):
             target_file = os.path.join(PUBLIC_DIR, audio_rel)
             await generate_speech(sentence, voice, target_file)
 
+    # 4. Вопросы к тексту
+    for item in unit.get("questions", []):
+        question = item.get("question", "").strip()
+        audio_rel = item.get("audio", "").strip()
+        if question and audio_rel:
+            target_file = os.path.join(PUBLIC_DIR, audio_rel)
+            await generate_speech(question, voice, target_file)
+
     print(f"=== Урок '{title}' успешно озвучен ===\n")
 
 
@@ -104,11 +112,11 @@ async def main():
         print("Результат проверки:", "УСПЕШНО" if ok else "ОШИБКА ПОДКЛЮЧЕНИЯ")
         sys.exit(0 if ok else 1)
 
-    else:
+    elif target_unit is None:
         target_unit = "--all"
 
     if target_unit == "--all":
-        units_dir = os.path.join(PROJECT_ROOT, "data", "units")
+        units_dir = os.path.join(PUBLIC_DIR, "data", "units")
         for root, _, files in os.walk(units_dir):
             for f in files:
                 if f.endswith(".json"):

@@ -1,48 +1,94 @@
 import { state } from './core/state.js';
 import { audio } from './core/audio.js';
 import { catalogLoader } from './core/catalog.js';
+import { getAllExerciseKeys } from './core/exercises.js';
+import { escapeHtml, emptyState, toast } from './core/utils.js';
 import { mountPuzzle, destroyPuzzle } from './modes/puzzle.js';
 import { mountSpeller, destroySpeller } from './modes/speller.js';
+import { mountQuiz, destroyQuiz } from './modes/quiz.js';
+import { mountDictation, destroyDictation } from './modes/dictation.js';
 import { mountReader, destroyReader } from './modes/reader.js';
 import { mountAnalyzer, destroyAnalyzer } from './modes/analyzer.js';
 
 const MODE_HANDLERS = {
   puzzle: { mount: mountPuzzle, destroy: destroyPuzzle },
   speller: { mount: mountSpeller, destroy: destroySpeller },
+  quiz: { mount: mountQuiz, destroy: destroyQuiz },
+  dictation: { mount: mountDictation, destroy: destroyDictation },
   reader: { mount: mountReader, destroy: destroyReader },
   analyzer: { mount: mountAnalyzer, destroy: destroyAnalyzer },
 };
 
-let currentModeName = 'puzzle';
+const MODE_HINTS = {
+  puzzle: {
+    title: 'Пазл предложений',
+    keys: [
+      ['клик / перетаскивание', 'переместить слово'],
+      ['Enter', 'проверить / далее'],
+      ['Backspace', 'убрать последнее слово'],
+      ['Пробел', 'прослушать'],
+    ],
+  },
+  speller: {
+    title: 'Спеллер слов',
+    keys: [
+      ['буквы на клавиатуре', 'набрать слово'],
+      ['Enter', 'проверить / далее'],
+      ['Backspace', 'стереть букву'],
+      ['Пробел', 'прослушать'],
+    ],
+  },
+  quiz: {
+    title: 'Вопросы к тексту',
+    keys: [
+      ['1–4', 'выбрать ответ'],
+      ['Enter', 'следующий вопрос'],
+      ['Пробел', 'прослушать вопрос'],
+    ],
+  },
+  dictation: {
+    title: 'Диктант на слух',
+    keys: [
+      ['Enter', 'проверить / далее'],
+      ['Ctrl + Пробел', 'прослушать ещё раз'],
+      ['Tab', 'следующий пропуск'],
+    ],
+    note: 'Для немецкого можно писать ae/oe/ue/ss вместо ä/ö/ü/ß.',
+  },
+  reader: {
+    title: 'Умный ридер',
+    keys: [
+      ['клик по строке', 'прослушать предложение'],
+      ['клик по слову', 'произношение и перевод'],
+    ],
+  },
+  analyzer: {
+    title: 'Текст-лаборатория',
+    keys: [],
+    note: 'Вставьте любой текст, разберите его и сохраните как урок в текущую учебную зону — все режимы тренировки заработают для него автоматически.',
+  },
+};
 
-function updateStatsUI() {
-  const correctEl = document.getElementById('stat-correct');
-  const mistakesEl = document.getElementById('stat-mistakes');
-  if (!state.activeUnit) {
-    if (correctEl) correctEl.textContent = '0';
-    if (mistakesEl) mistakesEl.textContent = '0';
-    return;
-  }
-  const currentStats = state.getUnitStats(state.activeUnit.id);
-  if (correctEl) correctEl.textContent = String(currentStats.correct || 0);
-  if (mistakesEl) mistakesEl.textContent = String(currentStats.mistakes || 0);
-}
+let currentModeName = null;
+let loadRequestId = 0;
 
+/* ---------------------------------------------------------
+   Шапка: профиль, курс, урок, прогресс
+   --------------------------------------------------------- */
 function renderProfileSelect() {
   const select = document.getElementById('profile-select');
+  const avatar = document.getElementById('profile-avatar');
   if (!select) return;
 
   select.innerHTML = '';
-  const profiles = state.getProfiles();
-  profiles.forEach((profile) => {
+  state.getProfiles().forEach((profile) => {
     const option = document.createElement('option');
     option.value = profile.id;
-    option.textContent = `${profile.avatar} ${profile.name}`;
-    if (profile.id === state.currentProfileId) {
-      option.selected = true;
-    }
+    option.textContent = profile.name;
+    option.selected = profile.id === state.currentProfileId;
     select.appendChild(option);
   });
+  if (avatar) avatar.textContent = state.getProfile()?.avatar || '👤';
 }
 
 function renderTrackSelect() {
@@ -54,25 +100,83 @@ function renderTrackSelect() {
   const activeTrack = state.getActiveTrack();
 
   if (!tracks.length) {
-    const emptyOpt = document.createElement('option');
-    emptyOpt.value = '';
-    emptyOpt.textContent = 'Нет созданных зон';
-    trackSelect.appendChild(emptyOpt);
+    trackSelect.innerHTML = '<option value="">Нет учебных зон</option>';
+    trackSelect.disabled = true;
     return;
   }
 
+  trackSelect.disabled = false;
   tracks.forEach((track) => {
     const option = document.createElement('option');
     option.value = track.id;
     option.textContent = track.title;
-    if (activeTrack && activeTrack.id === track.id) {
-      option.selected = true;
-    }
+    option.selected = activeTrack?.id === track.id;
     trackSelect.appendChild(option);
   });
 }
 
+function getUnitDisplayTitle(unit) {
+  return unit?.title || unit?.name || 'Урок';
+}
+
+function renderLessonProgress() {
+  const scoreEl = document.getElementById('lesson-score');
+  const bar = document.getElementById('lesson-progress-bar');
+  const pctEl = document.getElementById('lesson-progress-pct');
+  const unit = state.activeUnit;
+
+  const keys = getAllExerciseKeys(unit);
+  const stats = unit ? state.getUnitStats(unit.id) : { correct: 0, mistakes: 0, done: [] };
+  const doneSet = new Set(stats.done || []);
+  const done = keys.filter((k) => doneSet.has(k)).length;
+  const pct = keys.length ? Math.round((done / keys.length) * 100) : 0;
+
+  if (bar) bar.style.width = `${pct}%`;
+  if (pctEl) pctEl.textContent = `${pct}%`;
+
+  const correct = stats.correct || 0;
+  const mistakes = stats.mistakes || 0;
+  const total = correct + mistakes;
+  if (scoreEl) scoreEl.textContent = unit ? `✓ ${correct} · ✕ ${mistakes}` : '';
+  document.getElementById('stat-correct').textContent = String(correct);
+  document.getElementById('stat-mistakes').textContent = String(mistakes);
+  document.getElementById('stat-accuracy').textContent = total ? `${Math.round((correct / total) * 100)}%` : '—';
+  document.getElementById('stat-done').textContent = `Пройдено заданий: ${done} из ${keys.length}`;
+}
+
+function renderMotto() {
+  const card = document.getElementById('motto-card');
+  const track = state.getActiveTrack();
+  const lang = state.activeUnit?.lang || track?.lang || 'de';
+  const motto = state.languages?.[lang]?.motto;
+  if (!card) return;
+  card.dataset.lang = lang;
+  document.getElementById('motto-target').textContent = motto?.target || 'Lingua Studio';
+  document.getElementById('motto-ru').textContent = motto?.ru || 'Немного практики каждый день.';
+}
+
+function renderHints() {
+  const card = document.getElementById('hint-card');
+  if (!card) return;
+  const meta = MODE_HINTS[state.activeMode] || MODE_HINTS.puzzle;
+  card.innerHTML = `
+    <h3 class="side-card-title">${escapeHtml(meta.title)}: подсказки</h3>
+    ${
+      meta.keys.length
+        ? `<ul>${meta.keys.map(([k, v]) => `<li><kbd>${escapeHtml(k)}</kbd> ${escapeHtml(v)}</li>`).join('')}</ul>`
+        : ''
+    }
+    ${meta.note ? `<p style="margin-top:10px">${escapeHtml(meta.note)}</p>` : ''}
+  `;
+}
+
+function updateDeleteUnitButton(unitMeta) {
+  const btn = document.getElementById('btn-delete-unit');
+  if (btn) btn.hidden = !unitMeta?.isCustom;
+}
+
 async function renderUnitSelectAndLoad(targetUnitId = null) {
+  const requestId = ++loadRequestId;
   const unitSelect = document.getElementById('unit-select');
   const workspace = document.getElementById('app-workspace');
   if (!unitSelect || !workspace) return;
@@ -80,29 +184,20 @@ async function renderUnitSelectAndLoad(targetUnitId = null) {
   unitSelect.innerHTML = '';
   const activeTrack = state.getActiveTrack();
   if (!activeTrack) {
-    unitSelect.innerHTML = '<option value="">Нет активного трека</option>';
+    unitSelect.innerHTML = '<option value="">Нет активной зоны</option>';
     unitSelect.disabled = true;
+    updateDeleteUnitButton(null);
+    state.setActiveUnit(null);
     return;
   }
 
-  const customUnits = state.getCustomUnits(activeTrack.id);
-  const units = catalogLoader.getUnitsForTrack(activeTrack, customUnits);
+  const units = catalogLoader.getUnitsForTrack(activeTrack, state.getCustomUnits(activeTrack.id));
 
   if (!units.length) {
-    const emptyOpt = document.createElement('option');
-    emptyOpt.value = '';
-    emptyOpt.textContent = 'В треке нет уроков';
-    unitSelect.appendChild(emptyOpt);
+    unitSelect.innerHTML = '<option value="">В зоне пока нет уроков</option>';
     unitSelect.disabled = true;
-
-    workspace.innerHTML = `
-      <div class="exercise-wrapper" style="text-align: center; padding: 40px 20px;">
-        <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">В этой учебной зоне пока пусто</h3>
-        <p style="color: #64748b; font-size: 0.9rem; max-width: 460px; margin: 0 auto 16px;">
-          Вы можете разобрать любой текст во вкладке <strong>«Текст-лаборатория»</strong> и сохранить его сюда как отдельный урок.
-        </p>
-      </div>
-    `;
+    updateDeleteUnitButton(null);
+    state.setActiveUnit(null);
     return;
   }
 
@@ -110,40 +205,94 @@ async function renderUnitSelectAndLoad(targetUnitId = null) {
   units.forEach((u) => {
     const opt = document.createElement('option');
     opt.value = u.id;
-    opt.textContent = (u.isCustom ? '★ ' : '') + (u.title || u.name);
+    opt.textContent = (u.isCustom ? '★ ' : '') + getUnitDisplayTitle(u);
     unitSelect.appendChild(opt);
   });
 
-  const selectedUnitMeta = units.find((u) => u.id === targetUnitId) || units[0];
+  const savedUnitId = targetUnitId || state.getLastUnitId(activeTrack.id);
+  const selectedUnitMeta = units.find((u) => u.id === savedUnitId) || units[0];
+  unitSelect.value = selectedUnitMeta.id;
+  updateDeleteUnitButton(selectedUnitMeta);
 
-  if (selectedUnitMeta) {
-    unitSelect.value = selectedUnitMeta.id;
-    try {
-      workspace.innerHTML = `
-        <div class="loading-placeholder">
-          <div class="spinner"></div>
-          <p>Загрузка модуля ${(selectedUnitMeta.title || selectedUnitMeta.name)}...</p>
-        </div>
-      `;
-      const unitData = await catalogLoader.loadUnit(selectedUnitMeta.file || selectedUnitMeta);
-      state.setActiveUnit(unitData);
-    } catch (err) {
-      workspace.innerHTML = `
-        <div class="feedback-banner show error" style="margin-top: 40px;">
-          Ошибка загрузки файла урока: ${err.message}
-        </div>
-      `;
-    }
+  workspace.innerHTML = `
+    <div class="loading-placeholder">
+      <div class="spinner"></div>
+      <p>Загрузка: ${escapeHtml(getUnitDisplayTitle(selectedUnitMeta))}…</p>
+    </div>
+  `;
+
+  try {
+    const unitData = await catalogLoader.loadUnit(selectedUnitMeta.isCustom ? selectedUnitMeta : selectedUnitMeta.file);
+    // Пока грузили, пользователь мог выбрать другой урок — устаревший ответ игнорируем
+    if (requestId !== loadRequestId) return;
+    state.setLastUnitId(activeTrack.id, unitData.id);
+    state.setActiveUnit(unitData);
+  } catch (err) {
+    if (requestId !== loadRequestId) return;
+    state.activeUnit = null;
+    renderLessonProgress();
+    workspace.innerHTML = emptyState(
+      '⚠️',
+      'Не удалось загрузить урок',
+      `${escapeHtml(err.message)}<br>Проверьте, что файл урока существует, и выберите другой урок.`
+    );
   }
 }
 
-/* Управление окном настроек (Модалка) */
+/* ---------------------------------------------------------
+   Режимы
+   --------------------------------------------------------- */
+function highlightModeTab(mode) {
+  document.querySelectorAll('.mode-btn').forEach((btn) => {
+    const active = btn.dataset.mode === mode;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-selected', String(active));
+    if (active) btn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  });
+}
+
+function mountCurrentMode() {
+  const workspace = document.getElementById('app-workspace');
+  if (!workspace) return;
+
+  const mode = MODE_HANDLERS[state.activeMode] ? state.activeMode : 'puzzle';
+  currentModeName = mode;
+  highlightModeTab(mode);
+  renderHints();
+
+  if (!state.activeUnit && mode !== 'analyzer') {
+    workspace.innerHTML = emptyState(
+      '📭',
+      'В этой учебной зоне пока нет уроков',
+      'Откройте <strong>«Текст-лабораторию»</strong>, вставьте любой текст и сохраните его как урок — здесь появятся упражнения.'
+    );
+    return;
+  }
+
+  workspace.innerHTML = '';
+  MODE_HANDLERS[mode].mount(workspace, state.activeUnit);
+}
+
+function destroyCurrentMode() {
+  if (currentModeName) MODE_HANDLERS[currentModeName]?.destroy();
+  currentModeName = null;
+}
+
+function remountMode() {
+  destroyCurrentMode();
+  mountCurrentMode();
+}
+
+/* ---------------------------------------------------------
+   Окно настроек
+   --------------------------------------------------------- */
 function openSettingsModal() {
   const modal = document.getElementById('settings-modal');
   if (!modal) return;
   renderProfilesList();
   renderTracksList();
   modal.hidden = false;
+  document.getElementById('input-profile-name')?.focus();
 }
 
 function closeSettingsModal() {
@@ -159,26 +308,25 @@ function renderProfilesList() {
   const profiles = state.getProfiles();
   profiles.forEach((p) => {
     const card = document.createElement('div');
-    card.className = 'item-card';
+    card.className = `item-card${p.id === state.currentProfileId ? ' current' : ''}`;
     card.innerHTML = `
       <div class="item-info">
-        <div class="item-name">${p.avatar} ${p.name}</div>
-        <div class="item-desc">${p.isCustom ? 'Пользовательский' : 'Предустановленный'}</div>
+        <div class="item-name">${escapeHtml(p.avatar)} ${escapeHtml(p.name)}</div>
+        <div class="item-desc">${p.isCustom ? 'Пользовательский' : 'Из каталога'}${p.id === state.currentProfileId ? ' · текущий' : ''}</div>
       </div>
       ${
         p.isCustom && profiles.length > 1
-          ? `<button type="button" class="btn-delete-item" data-id="${p.id}" title="Удалить профиль">🗑</button>`
-          : '<span class="badge-tag">Основной</span>'
+          ? '<button type="button" class="btn-delete-item" title="Удалить профиль" aria-label="Удалить профиль">🗑</button>'
+          : '<span class="badge-tag">Каталог</span>'
       }
     `;
-
     card.querySelector('.btn-delete-item')?.addEventListener('click', () => {
-      if (confirm(`Удалить профиль "${p.name}"?`)) {
+      if (confirm(`Удалить профиль «${p.name}» вместе с его зонами и уроками?`)) {
         state.deleteProfile(p.id);
         renderProfilesList();
+        toast('Профиль удалён');
       }
     });
-
     container.appendChild(card);
   });
 }
@@ -190,71 +338,53 @@ function renderTracksList() {
 
   const tracks = state.getTracks(state.currentProfileId);
   if (!tracks.length) {
-    container.innerHTML = '<div style="color: #64748b; font-size: 0.85rem;">Зон пока нет</div>';
+    container.innerHTML = '<div class="muted">Зон пока нет</div>';
     return;
   }
 
   tracks.forEach((t) => {
+    const unitsCount = state.getCustomUnits(t.id).length;
     const card = document.createElement('div');
-    card.className = 'item-card';
+    card.className = `item-card${t.id === state.getActiveTrack()?.id ? ' current' : ''}`;
     card.innerHTML = `
       <div class="item-info">
-        <div class="item-name">${t.title}</div>
-        <div class="item-desc">${t.description || t.lang.toUpperCase()}</div>
+        <div class="item-name">${escapeHtml(t.title)}</div>
+        <div class="item-desc">${escapeHtml(t.description || t.lang.toUpperCase())}${unitsCount ? ` · своих уроков: ${unitsCount}` : ''}</div>
       </div>
       ${
         t.isCustom
-          ? `<button type="button" class="btn-delete-item" data-id="${t.id}" title="Удалить трек">🗑</button>`
+          ? '<button type="button" class="btn-delete-item" title="Удалить зону" aria-label="Удалить зону">🗑</button>'
           : '<span class="badge-tag">Курс</span>'
       }
     `;
-
     card.querySelector('.btn-delete-item')?.addEventListener('click', () => {
-      if (confirm(`Удалить зону "${t.title}" и все её уроки?`)) {
+      if (confirm(`Удалить зону «${t.title}» и все её уроки?`)) {
         state.deleteTrack(state.currentProfileId, t.id);
         renderTracksList();
+        toast('Зона удалена');
       }
     });
-
     container.appendChild(card);
   });
 }
 
-function mountCurrentMode() {
-  const workspace = document.getElementById('app-workspace');
-  if (!workspace) return;
-
-  const mode = state.activeMode || 'puzzle';
-  currentModeName = mode;
-
-  document.querySelectorAll('.mode-btn').forEach((btn) => {
-    if (btn.dataset.mode === mode) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
-  });
-
-  if (!state.activeUnit && mode !== 'analyzer') {
-    return;
-  }
-
-  const handler = MODE_HANDLERS[mode];
-  if (handler) {
-    workspace.innerHTML = '';
-    handler.mount(workspace, state.activeUnit);
+/* ---------------------------------------------------------
+   Тема
+   --------------------------------------------------------- */
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0b1220' : '#f3f6fb');
+  try {
+    localStorage.setItem('lingua_theme', theme);
+  } catch {
+    /* ignore */
   }
 }
 
-function destroyCurrentMode() {
-  const handler = MODE_HANDLERS[currentModeName];
-  if (handler) {
-    handler.destroy();
-  }
-}
-
+/* ---------------------------------------------------------
+   События
+   --------------------------------------------------------- */
 function initEventHandlers() {
-  // Навигация режимов
   document.querySelectorAll('.mode-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const targetMode = btn.dataset.mode;
@@ -265,37 +395,57 @@ function initEventHandlers() {
     });
   });
 
-  // Смена профиля через Select
   document.getElementById('profile-select')?.addEventListener('change', (e) => {
-    const profileId = e.target.value;
-    if (!profileId) return;
+    if (!e.target.value) return;
     audio.playClick();
-    state.setProfile(profileId);
+    state.setProfile(e.target.value);
   });
 
-  // Смена трека (зоны)
   document.getElementById('course-select')?.addEventListener('change', (e) => {
-    const trackId = e.target.value;
-    if (!trackId) return;
+    if (!e.target.value) return;
     audio.playClick();
-    state.setActiveTrack(trackId);
+    state.setActiveTrack(e.target.value);
   });
 
-  // Смена урока
   document.getElementById('unit-select')?.addEventListener('change', (e) => {
-    const unitId = e.target.value;
-    if (!unitId) return;
+    if (!e.target.value) return;
     audio.playClick();
-    renderUnitSelectAndLoad(unitId);
+    renderUnitSelectAndLoad(e.target.value);
   });
 
-  // Скорость воспроизведения
-  document.getElementById('audio-rate-select')?.addEventListener('change', (e) => {
-    const rate = parseFloat(e.target.value) || 1.0;
-    audio.setRate(rate);
+  document.getElementById('btn-delete-unit')?.addEventListener('click', () => {
+    const track = state.getActiveTrack();
+    const unit = state.activeUnit;
+    if (!track || !unit?.isCustom) return;
+    if (confirm(`Удалить урок «${getUnitDisplayTitle(unit)}»?`)) {
+      state.deleteCustomUnit(track.id, unit.id);
+      toast('Урок удалён');
+    }
   });
 
-  // Модалка настроек
+  const rateSelect = document.getElementById('audio-rate-select');
+  if (rateSelect) {
+    const current = String(audio.playbackRate);
+    if (![...rateSelect.options].some((o) => o.value === current)) {
+      rateSelect.insertAdjacentHTML('beforeend', `<option value="${current}">${current}×</option>`);
+    }
+    rateSelect.value = current;
+    rateSelect.addEventListener('change', (e) => audio.setRate(parseFloat(e.target.value) || 1));
+  }
+
+  document.getElementById('btn-theme')?.addEventListener('click', () => {
+    setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  });
+
+  document.getElementById('btn-reset-progress')?.addEventListener('click', () => {
+    const unit = state.activeUnit;
+    if (!unit) return;
+    if (confirm('Сбросить статистику и прогресс этого урока?')) {
+      state.resetUnitStats(unit.id);
+      toast('Прогресс урока сброшен');
+    }
+  });
+
   document.getElementById('btn-open-settings')?.addEventListener('click', openSettingsModal);
   document.getElementById('btn-close-settings')?.addEventListener('click', closeSettingsModal);
   document.getElementById('settings-modal')?.addEventListener('click', (e) => {
@@ -305,53 +455,49 @@ function initEventHandlers() {
     if (e.key === 'Escape') closeSettingsModal();
   });
 
-  // Вкладки в настройках
   document.querySelectorAll('.modal-tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const targetTab = btn.dataset.tab;
-      document.querySelectorAll('.modal-tab-btn').forEach((b) => b.classList.remove('active'));
+      document.querySelectorAll('.modal-tab-btn').forEach((b) => b.classList.toggle('active', b === btn));
       document.querySelectorAll('.tab-pane').forEach((p) => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(`tab-pane-${targetTab}`)?.classList.add('active');
+      document.getElementById(`tab-pane-${btn.dataset.tab}`)?.classList.add('active');
     });
   });
 
-  // Создание профиля
   document.getElementById('form-create-profile')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const nameInput = document.getElementById('input-profile-name');
-    const avatarSelect = document.getElementById('select-profile-avatar');
     const name = nameInput.value.trim();
-    const avatar = avatarSelect.value;
     if (!name) return;
     audio.playSuccess();
-    state.createProfile({ name, avatar });
+    state.createProfile({ name, avatar: document.getElementById('select-profile-avatar').value });
     nameInput.value = '';
     renderProfilesList();
+    renderTracksList();
+    toast(`Профиль «${name}» создан`, 'success');
   });
 
-  // Создание трека (зоны)
   document.getElementById('form-create-track')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const langSelect = document.getElementById('input-track-lang');
     const titleInput = document.getElementById('input-track-title');
     const descInput = document.getElementById('input-track-desc');
     const title = titleInput.value.trim();
     if (!title) return;
     audio.playSuccess();
-    state.createTrack(state.currentProfileId, {
-      lang: langSelect.value,
+    const track = state.createTrack(state.currentProfileId, {
+      lang: document.getElementById('input-track-lang').value,
       title,
       description: descInput.value.trim(),
     });
+    state.setActiveTrack(track.id);
     titleInput.value = '';
     descInput.value = '';
     renderTracksList();
+    toast(`Зона «${title}» создана и выбрана`, 'success');
   });
 }
 
 function subscribeToState() {
-  state.subscribe((event) => {
+  state.subscribe((event, payload) => {
     switch (event) {
       case 'PROFILE_CHANGED':
       case 'PROFILES_UPDATED':
@@ -362,24 +508,30 @@ function subscribeToState() {
 
       case 'TRACK_CHANGED':
       case 'TRACKS_UPDATED':
-      case 'CUSTOM_UNIT_ADDED':
         renderTrackSelect();
         renderUnitSelectAndLoad();
         break;
 
+      case 'CUSTOM_UNIT_ADDED':
+        renderTrackSelect();
+        renderUnitSelectAndLoad(payload?.unit?.id);
+        break;
+
       case 'UNIT_LOADED':
-        updateStatsUI();
-        destroyCurrentMode();
-        mountCurrentMode();
+        renderLessonProgress();
+        renderMotto();
+        remountMode();
         break;
 
       case 'MODE_CHANGED':
-        destroyCurrentMode();
-        mountCurrentMode();
+        remountMode();
         break;
 
       case 'STATS_UPDATED':
-        updateStatsUI();
+        renderLessonProgress();
+        break;
+
+      default:
         break;
     }
   });
@@ -388,24 +540,26 @@ function subscribeToState() {
 async function bootstrap() {
   initEventHandlers();
   subscribeToState();
+  highlightModeTab(state.activeMode);
+  renderHints();
 
   try {
     const catalog = await catalogLoader.loadCatalog('data/catalog.json');
     state.initCatalogData(catalog);
-
     renderProfileSelect();
     renderTrackSelect();
+    renderMotto();
     await renderUnitSelectAndLoad();
   } catch (err) {
     const workspace = document.getElementById('app-workspace');
     if (workspace) {
-      workspace.innerHTML = `
-        <div class="feedback-banner show error" style="margin-top: 40px;">
-          Критическая ошибка инициализации каталога: ${err.message}
-        </div>
-      `;
+      workspace.innerHTML = emptyState('⚠️', 'Не удалось загрузить каталог курсов', escapeHtml(err.message));
     }
   }
 }
 
-document.addEventListener('DOMContentLoaded', bootstrap);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrap);
+} else {
+  bootstrap();
+}

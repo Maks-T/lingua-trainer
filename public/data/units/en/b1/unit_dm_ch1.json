@@ -342,6 +342,18 @@
       "audio": "audio/en/b1/unit_dm_ch1/s14.mp3"
     }
   ],
+  "questions": [
+    {"id": "q1", "question": "Which nights does the narrator love?", "ru": "Какие вечера любит рассказчик?", "answer": "Thursday nights", "options": ["Thursday nights", "Friday nights", "Saturday nights", "Sunday nights"], "ref": "t1", "audio": "audio/en/b1/unit_dm_ch1/q1.mp3"},
+    {"id": "q2", "question": "What is family night?", "ru": "Что такое семейный вечер?", "answer": "A tradition just for the three of them", "options": ["A tradition just for the three of them", "A party with friends", "A lecture at the university", "A dinner at a bar"], "ref": "t1", "audio": "audio/en/b1/unit_dm_ch1/q2.mp3"},
+    {"id": "q3", "question": "What doesn't the narrator know while standing in his kitchen?", "ru": "Чего не знает рассказчик, стоя на кухне?", "answer": "That tonight is the end of everything he knows", "options": ["That tonight is the end of everything he knows", "That his son is ill", "That Ryan is coming to visit", "That he has lost his job"], "ref": "t2", "audio": "audio/en/b1/unit_dm_ch1/q3.mp3"},
+    {"id": "q4", "question": "What was Daniela fifteen years ago?", "ru": "Кем была Даниэла пятнадцать лет назад?", "answer": "A rising star of Chicago's art scene", "options": ["A rising star of Chicago's art scene", "A research scientist", "A university teacher", "A bartender"], "ref": "t4", "audio": "audio/en/b1/unit_dm_ch1/q4.mp3"},
+    {"id": "q5", "question": "What does Ryan order?", "ru": "Что заказывает Райан?", "answer": "The most expensive drinks in the house", "options": ["The most expensive drinks in the house", "Two cheap beers", "A glass of water", "Nothing at all"], "ref": "t5", "audio": "audio/en/b1/unit_dm_ch1/q5.mp3"},
+    {"id": "q6", "question": "What does Ryan ask the narrator?", "ru": "О чём Райан спрашивает рассказчика?", "answer": "Whether he is more a research scientist or a teacher", "options": ["Whether he is more a research scientist or a teacher", "Whether he loves his wife", "Where he lives now", "Why he is so drunk"], "ref": "t6", "audio": "audio/en/b1/unit_dm_ch1/q6.mp3"},
+    {"id": "q7", "question": "What is beginning to clear the narrator's head?", "ru": "Что начинает прояснять голову рассказчика?", "answer": "The cold", "options": ["The cold", "A cup of coffee", "Loud music", "A conversation with Ryan"], "ref": "t7", "audio": "audio/en/b1/unit_dm_ch1/q7.mp3"},
+    {"id": "q8", "question": "What is four inches from the narrator's nose?", "ru": "Что находится в четырёх дюймах от носа рассказчика?", "answer": "The barrel of a gun", "options": ["The barrel of a gun", "A geisha mask", "A syringe", "A car key"], "ref": "t8", "audio": "audio/en/b1/unit_dm_ch1/q8.mp3"},
+    {"id": "q9", "question": "What will happen if Jason doesn't follow the directions?", "ru": "Что случится, если Джейсон не выполнит инструкции?", "answer": "He will be shot through the seat", "options": ["He will be shot through the seat", "He will be left in the street", "He will lose his money", "He will miss family night"], "ref": "t9", "audio": "audio/en/b1/unit_dm_ch1/q9.mp3"},
+    {"id": "q10", "question": "What does the abductor drop on the concrete?", "ru": "Что похититель бросает на бетон?", "answer": "An ampoule and a syringe", "options": ["An ampoule and a syringe", "A gun and a mask", "Money and keys", "A phone and a letter"], "ref": "t10", "audio": "audio/en/b1/unit_dm_ch1/q10.mp3"}
+  ],
   "colors": [
     {
       "color": "limeGreen",

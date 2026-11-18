@@ -1,246 +1,249 @@
-import nlp from 'compromise';
 import { audio } from '../core/audio.js';
 import { state } from '../core/state.js';
+import { escapeHtml, tokenize, normalizeWord, shuffle, toast } from '../core/utils.js';
 
-let currentContainer = null;
+let container = null;
 let currentUnit = null;
 
-export function mountAnalyzer(container, unit) {
-  currentContainer = container;
+const SAMPLE_TEXT = {
+  de: 'Guten Tag! Ich heiße Anna und ich komme aus Berlin. Ich lerne Englisch, weil ich viel reise. Am Wochenende lese ich gern Bücher.',
+  en: 'Good morning! My name is Anna and I live in London. I am learning German because I travel a lot. At the weekend I like reading books.',
+  pl: 'Dzień dobry! Mam na imię Anna i mieszkam w Warszawie. Uczę się niemieckiego, bo dużo podróżuję.',
+  es: '¡Buenos días! Me llamo Ana y vivo en Madrid. Estudio alemán porque viajo mucho.',
+};
+
+const ALPHABET = {
+  de: 'abcdefghijklmnopqrstuvwxyzäöüß',
+  pl: 'aąbcćdeęfghijklłmnńoóprsśtuwyzźż',
+  es: 'abcdefghijlmnñopqrstuvxyzáéíóú',
+  en: 'abcdefghijklmnopqrstuvwxyz',
+};
+
+// Короткие служебные слова — не годятся в «ключевые»
+const STOP_WORDS = new Set(
+  (
+    'the and for are but not you all any can had her was one our out has him his how its may new now old see two way who did get let put say she too use that with have this will your from they know want been good much some time very when come here just like long make many more only over such take than them well were what into also ' +
+    'der die das und ist ich du er sie es wir ihr ein eine einen dem den des mit von aus bei nach zum zur auf für nicht auch aber oder wie was wer wo sehr noch schon dann denn doch hier sind bin bist hat habe haben war'
+  ).split(' ')
+);
+
+function getLang() {
+  return currentUnit?.lang || state.getActiveTrack()?.lang || 'de';
+}
+
+function getInitialText() {
+  if (currentUnit?.text?.length) return currentUnit.text.map((t) => t.target).join('\n');
+  return SAMPLE_TEXT[getLang()] || SAMPLE_TEXT.en;
+}
+
+function splitSentences(text) {
+  return text
+    .split(/(?<=[.!?…])\s+|\n+/u)
+    .map((s) => s.trim())
+    .filter((s) => tokenize(s).some((t) => t.type === 'word'));
+}
+
+function keywordFrequency(text) {
+  const freq = new Map();
+  tokenize(text)
+    .filter((t) => t.type === 'word')
+    .forEach((t) => {
+      const w = t.text;
+      const key = normalizeWord(w);
+      if (key.length < 3 || STOP_WORDS.has(key) || /^\d+$/.test(key)) return;
+      const entry = freq.get(key) || { word: w, count: 0 };
+      entry.count += 1;
+      freq.set(key, entry);
+    });
+  return [...freq.values()].sort((a, b) => b.count - a.count || b.word.length - a.word.length);
+}
+
+export function mountAnalyzer(target, unit) {
+  container = target;
   currentUnit = unit;
+  const lang = getLang();
+  const track = state.getActiveTrack();
 
   container.innerHTML = `
-    <div class="exercise-wrapper">
-      <div class="analyzer-container">
-        <div class="analyzer-input-col">
-          <h3 style="font-size: 1rem; font-weight: 700;">Свободный текст для анализа</h3>
-          <textarea class="analyzer-textarea" id="analyzer-text-input" placeholder="Вставьте сюда любой немецкий или английский текст статьи, диалога или упражнения...">${getInitialText(unit)}</textarea>
+    <div class="exercise">
+      <div class="analyzer">
+        <div>
+          <h3 class="section-heading">Текст для разбора</h3>
+          <textarea class="textarea" id="analyzer-input" lang="${escapeHtml(lang)}" placeholder="Вставьте сюда статью, диалог, субтитры или упражнение…">${escapeHtml(getInitialText())}</textarea>
           <div class="analyzer-actions">
-            <button type="button" class="analyzer-btn" id="btn-extract-verbs">Извлечь глаголы</button>
-            <button type="button" class="analyzer-btn" id="btn-extract-words">Ключевые слова</button>
-            <button type="button" class="analyzer-btn" id="btn-save-as-unit" style="background: #0f172a; border-color: #0f172a;">Сохранить в текущий трек</button>
-            <button type="button" class="analyzer-btn" id="btn-export-json" style="background: #059669; border-color: #059669;">Скопировать JSON</button>
+            <button type="button" class="btn btn-secondary btn-small" id="btn-keywords">Ключевые слова</button>
+            <button type="button" class="btn btn-secondary btn-small" id="btn-sentences">Предложения</button>
+            <button type="button" class="btn btn-secondary btn-small" id="btn-verbs" ${lang === 'en' ? '' : 'disabled title="Разбор частей речи доступен для английского"'}>Глаголы (EN)</button>
+            <button type="button" class="btn btn-secondary btn-small" id="btn-export">Скопировать JSON</button>
           </div>
         </div>
 
-        <div class="analyzer-output-col">
-          <h3 style="font-size: 1rem; font-weight: 700;">Результаты NLP-анализа</h3>
-          <div class="analyzer-results-card">
-            <div id="analyzer-stats" style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">
-              Нажмите кнопку для обработки текста
-            </div>
-            <div class="analyzer-tag-list" id="analyzer-tags"></div>
+        <div>
+          <h3 class="section-heading">Результат</h3>
+          <div class="analyzer-results">
+            <div class="analyzer-stats" id="analyzer-stats">Выберите действие слева. Нажмите на слово, чтобы услышать его.</div>
+            <div class="tag-list" id="analyzer-tags"></div>
           </div>
+          <h3 class="section-heading" style="margin-top:18px">Сохранить как урок</h3>
+          <p class="muted">Зона: <strong>${escapeHtml(track?.title || 'не выбрана')}</strong>. Из текста будут созданы задания для всех режимов.</p>
+          <form class="save-form" id="save-form">
+            <input type="text" class="input-control" id="unit-title" maxlength="80" placeholder="Название урока" required />
+            <button type="submit" class="btn btn-primary" style="min-width:0" ${track ? '' : 'disabled'}>Сохранить</button>
+          </form>
         </div>
       </div>
     </div>
   `;
 
-  container.querySelector('#btn-extract-verbs')?.addEventListener('click', handleExtractVerbs);
-  container.querySelector('#btn-extract-words')?.addEventListener('click', handleExtractWords);
-  container.querySelector('#btn-save-as-unit')?.addEventListener('click', handleSaveAsUnit);
-  container.querySelector('#btn-export-json')?.addEventListener('click', handleExportJson);
+  container.querySelector('#btn-keywords').addEventListener('click', showKeywords);
+  container.querySelector('#btn-sentences').addEventListener('click', showSentences);
+  container.querySelector('#btn-verbs').addEventListener('click', showVerbs);
+  container.querySelector('#btn-export').addEventListener('click', exportJson);
+  container.querySelector('#save-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveAsUnit();
+  });
 }
 
-function getInitialText(unit) {
-  if (unit?.text && unit.text.length) {
-    return unit.text.map((t) => t.target).join('\n');
-  }
-  return 'Guten Tag! Ich lerne Deutsch und Englisch. Das Programmieren macht viel Spaß.';
+function getText() {
+  return container?.querySelector('#analyzer-input')?.value.trim() || '';
 }
 
-function handleExtractVerbs() {
-  const input = currentContainer?.querySelector('#analyzer-text-input');
-  const tagsContainer = currentContainer?.querySelector('#analyzer-tags');
-  const stats = currentContainer?.querySelector('#analyzer-stats');
-  if (!input || !tagsContainer || !stats) return;
+function renderTags(list, statsText, colorClass = '') {
+  const stats = container.querySelector('#analyzer-stats');
+  const tags = container.querySelector('#analyzer-tags');
+  stats.textContent = statsText;
+  tags.innerHTML = list.length
+    ? list
+        .map(
+          (t) =>
+            `<button type="button" class="tag ${colorClass}" data-say="${escapeHtml(t.word)}">${escapeHtml(t.word)}${t.count > 1 ? `<small>×${t.count}</small>` : ''}</button>`
+        )
+        .join('')
+    : '<span class="muted">Ничего не найдено</span>';
+  tags.querySelectorAll('[data-say]').forEach((btn) =>
+    btn.addEventListener('click', () => audio.playSpeech('', null, null, btn.dataset.say, getLang()))
+  );
+}
 
+function showKeywords() {
+  const text = getText();
+  if (!text) return toast('Вставьте текст для анализа');
   audio.playClick();
-  const text = input.value.trim();
-  if (!text) return;
-
-  const doc = nlp(text);
-  const verbs = doc.verbs().out('array');
-  const uniqueVerbs = [...new Set(verbs.map((v) => v.toLowerCase()))];
-
-  stats.textContent = `Найдено уникальных глаголов / связок: ${uniqueVerbs.length}`;
-  tagsContainer.innerHTML = '';
-
-  if (!uniqueVerbs.length) {
-    tagsContainer.innerHTML = '<span style="color: #94a3b8;">Глаголы не обнаружены</span>';
-    return;
-  }
-
-  uniqueVerbs.forEach((verb) => {
-    const tag = document.createElement('span');
-    tag.className = 'analyzer-tag color-limeGreen';
-    tag.textContent = verb;
-    tagsContainer.appendChild(tag);
-  });
+  const list = keywordFrequency(text).slice(0, 40);
+  renderTags(list, `Ключевые слова (без служебных): ${list.length}`);
 }
 
-function handleExtractWords() {
-  const input = currentContainer?.querySelector('#analyzer-text-input');
-  const tagsContainer = currentContainer?.querySelector('#analyzer-tags');
-  const stats = currentContainer?.querySelector('#analyzer-stats');
-  if (!input || !tagsContainer || !stats) return;
-
+function showSentences() {
+  const text = getText();
+  if (!text) return toast('Вставьте текст для анализа');
   audio.playClick();
-  const text = input.value.trim();
-  if (!text) return;
-
-  const doc = nlp(text);
-  const terms = doc.terms().out('array');
-
-  const frequency = {};
-  terms.forEach((term) => {
-    const clean = term.toLowerCase().replace(/[^a-zA-ZäöüßÄÖÜа-яА-Я0-9]/g, '');
-    if (clean.length >= 3) {
-      frequency[clean] = (frequency[clean] || 0) + 1;
-    }
-  });
-
-  const sortedWords = Object.entries(frequency)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 30);
-
-  stats.textContent = `Уникальных слов (от 3 букв): ${sortedWords.length}`;
-  tagsContainer.innerHTML = '';
-
-  if (!sortedWords.length) {
-    tagsContainer.innerHTML = '<span style="color: #94a3b8;">Слова не обнаружены</span>';
-    return;
-  }
-
-  sortedWords.forEach(([word, count]) => {
-    const tag = document.createElement('span');
-    tag.className = 'analyzer-tag';
-    tag.textContent = `${word} (${count})`;
-    tagsContainer.appendChild(tag);
-  });
+  const sentences = splitSentences(text);
+  const stats = container.querySelector('#analyzer-stats');
+  const tags = container.querySelector('#analyzer-tags');
+  stats.textContent = `Предложений: ${sentences.length}`;
+  tags.innerHTML = `<ol style="padding-left:20px; display:flex; flex-direction:column; gap:6px">${sentences
+    .map((s) => `<li>${escapeHtml(s)}</li>`)
+    .join('')}</ol>`;
 }
 
-function handleSaveAsUnit() {
-  const input = currentContainer?.querySelector('#analyzer-text-input');
-  const stats = currentContainer?.querySelector('#analyzer-stats');
-  if (!input) return;
-
-  const text = input.value.trim();
-  if (!text) {
-    alert('Введите текст для сохранения в трек.');
-    return;
+async function showVerbs() {
+  const text = getText();
+  if (!text) return toast('Вставьте текст для анализа');
+  audio.playClick();
+  const stats = container.querySelector('#analyzer-stats');
+  stats.textContent = 'Загружаю NLP-модуль…';
+  try {
+    // compromise весит ~400 КБ — грузим только по требованию
+    const { default: nlp } = await import('compromise');
+    if (!container) return;
+    const verbs = [...new Set(nlp(text).verbs().toInfinitive().out('array').map((v) => v.toLowerCase()))];
+    renderTags(
+      verbs.map((word) => ({ word, count: 1 })),
+      `Глаголов (в начальной форме): ${verbs.length}`,
+      'color-limeGreen'
+    );
+  } catch (err) {
+    stats.textContent = `Не удалось загрузить NLP-модуль: ${err.message}`;
   }
+}
 
-  const track = state.getActiveTrack();
-  if (!track) {
-    alert('Сначала создайте или выберите доменный трек в шапке.');
-    return;
-  }
+function buildUnit(text, title) {
+  const lang = getLang();
+  const sentences = splitSentences(text);
+  const keywords = keywordFrequency(text).slice(0, 15);
+  const alphabet = ALPHABET[lang] || ALPHABET.en;
+  const allWords = tokenize(text).filter((t) => t.type === 'word').map((t) => t.text);
+  const id = `unit_${Date.now()}`;
 
-  const defaultTitle = `Урок: ${text.slice(0, 24).trim()}...`;
-  const title = prompt('Введите название для нового урока:', defaultTitle);
-  if (!title) return;
-
-  audio.playSuccess();
-  const doc = nlp(text);
-  const rawSentences = text
-    .split(/[\r\n]+|[.!?]+\s+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 2);
-
-  const terms = doc.terms().out('array');
-  const uniqueWords = [
-    ...new Set(
-      terms
-        .map((t) => t.toLowerCase().replace(/[^a-zA-ZäöüßÄÖÜа-яА-Я0-9]/g, ''))
-        .filter((w) => w.length >= 3)
-    ),
-  ].slice(0, 15);
-
-  const newUnit = {
-    id: `unit_${Date.now()}`,
-    title: title.trim(),
-    lang: track.lang || 'de',
-    level: track.level || 'custom',
-    text: rawSentences.map((s, idx) => ({
-      id: `t${idx + 1}`,
-      target: s,
-      ru: 'Текст для чтения и отработки',
-      audio: '',
-    })),
-    words: uniqueWords.map((w, idx) => ({
-      id: `w${idx + 1}`,
-      target: w,
-      ru: 'Ключевое слово',
-      transcript: '',
-      distractorLetters: 'a e i o u',
-      audio: '',
-    })),
-    sentences: rawSentences.slice(0, 8).map((s, idx) => ({
-      id: `s${idx + 1}`,
-      target: s,
-      ru: 'Соберите фразу',
-      distractorWords: [],
-      audio: '',
-    })),
+  return {
+    id,
+    title,
+    lang,
+    level: state.getActiveTrack()?.level || 'custom',
+    text: sentences.map((s, idx) => ({ id: `t${idx + 1}`, target: s, ru: '', audio: '' })),
+    words: keywords.map((k, idx) => {
+      const letters = new Set(normalizeWord(k.word));
+      const pool = [...alphabet].filter((c) => !letters.has(c));
+      return {
+        id: `w${idx + 1}`,
+        target: k.word,
+        ru: '',
+        transcript: '',
+        distractorLetters: shuffle(pool).slice(0, 3).join(' '),
+        audio: '',
+      };
+    }),
+    // Для пазла берём предложения средней длины
+    sentences: sentences
+      .filter((s) => {
+        const n = s.split(/\s+/).length;
+        return n >= 3 && n <= 14;
+      })
+      .slice(0, 12)
+      .map((s, idx) => {
+        const own = new Set(s.split(/\s+/).map(normalizeWord));
+        const distractors = shuffle([...new Set(allWords)].filter((w) => !own.has(normalizeWord(w)))).slice(0, 2);
+        return { id: `s${idx + 1}`, target: s, ru: '', distractorWords: distractors, audio: '' };
+      }),
     colors: [],
   };
-
-  const saved = state.addCustomUnit(track.id, newUnit);
-  state.setActiveUnit(saved);
-
-  if (stats) {
-    stats.textContent = `✓ Урок "${newUnit.title}" сохранен в трек "${track.title}"! Можете сразу переключиться на Пазл или Ридер.`;
-  }
 }
 
-function handleExportJson() {
-  const input = currentContainer?.querySelector('#analyzer-text-input');
-  if (!input) return;
+function saveAsUnit() {
+  const text = getText();
+  const titleInput = container.querySelector('#unit-title');
+  const title = titleInput.value.trim();
+  if (!text) return toast('Вставьте текст, который нужно сохранить');
+  if (!title) return titleInput.focus();
 
-  const text = input.value.trim();
-  if (!text) return;
+  const track = state.getActiveTrack();
+  if (!track) return toast('Сначала создайте учебную зону в настройках', 'error');
+
+  const unit = buildUnit(text, title);
+  if (!unit.text.length) return toast('В тексте не найдено предложений', 'error');
 
   audio.playSuccess();
-  const doc = nlp(text);
-  const terms = doc.terms().out('array');
-  const unique = [
-    ...new Set(
-      terms
-        .map((t) => t.toLowerCase().replace(/[^a-zA-ZäöüßÄÖÜа-яА-Я0-9]/g, ''))
-        .filter((w) => w.length >= 3)
-    ),
-  ].slice(0, 20);
+  // Событие CUSTOM_UNIT_ADDED само выберет и загрузит новый урок
+  state.addCustomUnit(track.id, unit);
+  toast(`Урок «${title}» сохранён в «${track.title}»`, 'success');
+}
 
-  const moduleTemplate = {
-    id: `custom-${Date.now()}`,
-    title: 'Пользовательский импортированный модуль',
-    lang: currentUnit?.lang || 'de',
-    level: currentUnit?.level || 'a1',
-    words: unique.map((w, index) => ({
-      id: `w${index + 1}`,
-      target: w,
-      ru: 'Перевод',
-      transcript: '',
-      distractorLetters: 'a e i',
-      audio: '',
-    })),
-  };
-
-  const jsonString = JSON.stringify(moduleTemplate, null, 2);
-  navigator.clipboard.writeText(jsonString).then(() => {
-    const stats = currentContainer?.querySelector('#analyzer-stats');
-    if (stats) {
-      const prev = stats.textContent;
-      stats.textContent = '✓ Шаблон модуля unit_v2 скопирован в буфер обмена!';
-      setTimeout(() => {
-        stats.textContent = prev;
-      }, 3000);
-    }
-  });
+async function exportJson() {
+  const text = getText();
+  if (!text) return toast('Вставьте текст для экспорта');
+  const title = container.querySelector('#unit-title').value.trim() || 'Пользовательский урок';
+  const json = JSON.stringify(buildUnit(text, title), null, 2);
+  try {
+    await navigator.clipboard.writeText(json);
+    audio.playSuccess();
+    toast('JSON урока скопирован в буфер обмена', 'success');
+  } catch {
+    toast('Браузер запретил доступ к буферу обмена', 'error');
+  }
 }
 
 export function destroyAnalyzer() {
-  currentContainer = null;
+  container = null;
   currentUnit = null;
 }

@@ -55,11 +55,7 @@ async function deploy() {
     fs.copyFileSync(indexHtml, path.join(BUILD_DIR, '404.html'));
   }
 
-  // Копируем data/ в dist, чтобы уроки и каталог попали в публикацию GitHub Pages
-  const dataDir = path.join(ROOT_DIR, 'data');
-  if (fs.existsSync(dataDir)) {
-    fs.cpSync(dataDir, path.join(BUILD_DIR, 'data'), { recursive: true });
-  }
+  // data/ и audio/ лежат в public/ — Vite сам копирует их в dist
 
   // 3. Создание чистой ветки и пуш
   log.step(`Шаг 3. Инициализация чистой ветки [${TARGET_BRANCH}] и отправка...`);

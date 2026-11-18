@@ -1,217 +1,195 @@
 import { state } from '../core/state.js';
 import { audio } from '../core/audio.js';
+import { createBoard } from '../core/board.js';
+import {
+  escapeHtml,
+  shuffle,
+  isTypingTarget,
+  isModalOpen,
+  exerciseHeader,
+  finishScreen,
+  listenButton,
+  playWithButton,
+  showFeedback,
+  emptyState,
+  ICONS,
+} from '../core/utils.js';
 
-let currentContainer = null;
-let currentUnit = null;
-let currentIndex = 0;
+let container = null;
+
+/** Enter/Пробел на кнопке внутри упражнения сработает как клик — не дублируем. */
+const isOwnButton = (e) => e.target instanceof HTMLButtonElement && Boolean(container?.contains(e.target));
+let unit = null;
 let questions = [];
-let selectedLetters = [];
-let bankLetters = [];
-let isChecked = false;
+let index = 0;
+let board = null;
+let checked = false;
+let firstTryCorrect = 0;
+let targetLetters = [];
 
-function normalize(str) {
-  return (str || '').toLowerCase().trim();
+const compact = (s) => String(s || '').replace(/\s+/g, '').toLowerCase();
+
+function parseDistractors(q) {
+  if (typeof q.distractorLetters === 'string') return q.distractorLetters.replace(/\s+/g, '').split('');
+  if (Array.isArray(q.distractorLetters)) return q.distractorLetters;
+  return [];
 }
 
-function renderCurrentWord() {
-  if (!currentContainer) return;
+function start() {
+  questions = shuffle(unit.words || []);
+  index = 0;
+  firstTryCorrect = 0;
+  renderWord();
+}
 
-  if (currentIndex >= questions.length) {
-    audio.playWin();
-    currentContainer.innerHTML = `
-      <div class="exercise-wrapper">
-        <div class="feedback-banner show success" style="margin-top: 40px;">
-          🎉 Все слова урока успешно собраны!
-        </div>
-        <div class="controls-panel">
-          <button type="button" class="btn-action btn-next" id="speller-restart-btn">Пройти заново</button>
-        </div>
-      </div>
-    `;
-    currentContainer.querySelector('#speller-restart-btn')?.addEventListener('click', () => {
-      currentIndex = 0;
-      questions = [...(currentUnit.words || [])].sort(() => Math.random() - 0.5);
-      renderCurrentWord();
-    });
+function renderFinish() {
+  audio.playWin();
+  container.innerHTML = finishScreen({
+    title: 'Все слова собраны!',
+    correct: firstTryCorrect,
+    total: questions.length,
+    restartId: 'speller-restart',
+  });
+  container.querySelector('#speller-restart')?.addEventListener('click', start);
+}
+
+function renderWord() {
+  if (!container) return;
+  if (index >= questions.length) {
+    renderFinish();
     return;
   }
 
-  const q = questions[currentIndex];
-  isChecked = false;
-  selectedLetters = [];
+  const q = questions[index];
+  checked = false;
+  // Пробелы в многословных словах (напр. «von Beruf») не собираются — сравниваем без них
+  targetLetters = [...String(q.target || '').replace(/\s+/g, '')];
+  const items = shuffle([...targetLetters, ...parseDistractors(q)]).map((text, i) => ({ id: `l${i}`, text }));
 
-  const targetLetters = q.target.replace(/\s+/g, '').split('');
-  let distractors = [];
-  if (typeof q.distractorLetters === 'string') {
-    distractors = q.distractorLetters.replace(/\s+/g, '').split('');
-  } else if (Array.isArray(q.distractorLetters)) {
-    distractors = q.distractorLetters;
-  }
-
-  const rawBank = [...targetLetters, ...distractors];
-  bankLetters = rawBank
-    .map((char, id) => ({ id: `letter-${id}-${char}`, text: char }))
-    .sort(() => Math.random() - 0.5);
-
-  currentContainer.innerHTML = `
-    <div class="exercise-wrapper">
-      <div class="prompt-card">
-        <div class="prompt-ru">${q.ru || ''}</div>
-        ${q.transcript ? `<div class="prompt-transcript">${q.transcript}</div>` : ''}
-        <button type="button" class="audio-btn" id="speller-audio-btn" aria-label="Прослушать">🔊</button>
+  container.innerHTML = `
+    <div class="exercise">
+      ${exerciseHeader('Соберите слово по буквам', index, questions.length)}
+      <div class="prompt">
+        <h1 class="prompt-title">${escapeHtml(q.ru || 'Соберите услышанное слово')}</h1>
+        ${q.transcript ? `<div class="prompt-sub">${escapeHtml(q.transcript)}</div>` : ''}
+        <div class="prompt-hint">Букв в слове: ${targetLetters.length}</div>
       </div>
-
-      <div class="board-container">
-        <div class="target-slots" id="speller-target-slots" data-placeholder="Соберите слово по буквам"></div>
-        <div class="source-bank" id="speller-source-bank"></div>
-      </div>
-
-      <div class="feedback-banner" id="speller-feedback"></div>
-
-      <div class="controls-panel">
-        <button type="button" class="btn-action btn-backspace" id="speller-backspace-btn">Стереть</button>
-        <button type="button" class="btn-action btn-check" id="speller-check-btn">Проверить</button>
-        <button type="button" class="btn-action btn-next" id="speller-next-btn" style="display: none;">Следующее</button>
+      ${listenButton('speller-listen')}
+      <div class="drop-zone" id="speller-zone" aria-label="Собранное слово"></div>
+      <div class="word-bank" id="speller-bank" aria-label="Буквы"></div>
+      <div class="feedback" id="speller-feedback" role="status"></div>
+      <div class="controls">
+        <button type="button" class="btn btn-secondary" id="speller-clear">${ICONS.trash}Очистить</button>
+        <div class="controls-right">
+          <button type="button" class="btn btn-primary" id="speller-check" disabled>Проверить ${ICONS.arrow}</button>
+          <button type="button" class="btn btn-primary" id="speller-next" hidden>Далее ${ICONS.arrow}</button>
+        </div>
       </div>
     </div>
   `;
 
-  const audioBtn = currentContainer.querySelector('#speller-audio-btn');
-  audioBtn?.addEventListener('click', () => {
-    audioBtn.classList.add('playing');
-    audio.playSpeech(q.audio, null, () => audioBtn.classList.remove('playing'), q.target, currentUnit?.lang);
+  const checkBtn = container.querySelector('#speller-check');
+  board = createBoard({
+    zoneEl: container.querySelector('#speller-zone'),
+    bankEl: container.querySelector('#speller-bank'),
+    items,
+    chipClass: () => 'letter',
+    slots: targetLetters.length,
+    onChange: () => {
+      checkBtn.disabled = board.selected.length === 0;
+    },
   });
 
-  currentContainer.querySelector('#speller-backspace-btn')?.addEventListener('click', handleBackspace);
-  currentContainer.querySelector('#speller-check-btn')?.addEventListener('click', handleCheck);
-  currentContainer.querySelector('#speller-next-btn')?.addEventListener('click', handleNext);
-
-  renderLetters();
+  container.querySelector('#speller-listen').addEventListener('click', listen);
+  container.querySelector('#speller-clear').addEventListener('click', () => board.clear());
+  checkBtn.addEventListener('click', check);
+  container.querySelector('#speller-next').addEventListener('click', next);
+  if (!q.ru) setTimeout(() => container && questions[index] === q && listen(), 300);
 }
 
-function renderLetters() {
-  if (!currentContainer) return;
-  const targetSlots = currentContainer.querySelector('#speller-target-slots');
-  const sourceBank = currentContainer.querySelector('#speller-source-bank');
-  if (!targetSlots || !sourceBank) return;
-
-  targetSlots.innerHTML = '';
-  selectedLetters.forEach((item, index) => {
-    const chip = document.createElement('div');
-    chip.className = 'chip letter';
-    chip.textContent = item.text;
-    if (!isChecked) {
-      chip.addEventListener('click', () => {
-        audio.playClick();
-        selectedLetters.splice(index, 1);
-        bankLetters.push(item);
-        renderLetters();
-      });
-    }
-    targetSlots.appendChild(chip);
-  });
-
-  sourceBank.innerHTML = '';
-  bankLetters.forEach((item, index) => {
-    const chip = document.createElement('div');
-    chip.className = 'chip letter';
-    chip.textContent = item.text;
-    if (!isChecked) {
-      chip.addEventListener('click', () => {
-        audio.playClick();
-        bankLetters.splice(index, 1);
-        selectedLetters.push(item);
-        renderLetters();
-      });
-    }
-    sourceBank.appendChild(chip);
-  });
+function listen() {
+  if (!container || !unit) return;
+  const q = questions[index];
+  if (!q) return;
+  playWithButton(audio, container?.querySelector('#speller-listen'), q.audio, q.target, unit.lang);
 }
 
-function handleBackspace() {
-  if (isChecked || selectedLetters.length === 0) return;
-  audio.playClick();
-  const removed = selectedLetters.pop();
-  if (removed) {
-    bankLetters.push(removed);
-  }
-  renderLetters();
-}
+function check() {
+  if (checked || !board?.selected.length) return;
+  const q = questions[index];
+  const assembled = board.selected.map((l) => l.text).join('');
+  const isCorrect = compact(assembled) === compact(q.target);
+  checked = true;
 
-function handleCheck() {
-  if (isChecked) return;
-  const q = questions[currentIndex];
-  const assembled = selectedLetters.map((l) => l.text).join('');
-  const isCorrect = normalize(assembled) === normalize(q.target);
-  const feedback = currentContainer?.querySelector('#speller-feedback');
-  const checkBtn = currentContainer?.querySelector('#speller-check-btn');
-  const nextBtn = currentContainer?.querySelector('#speller-next-btn');
-  const audioBtn = currentContainer?.querySelector('#speller-audio-btn');
+  state.recordAnswer(unit.id, isCorrect, `speller:${q.id}`);
+  if (isCorrect) firstTryCorrect += 1;
 
-  isChecked = true;
-  state.recordAnswer(currentUnit.id, isCorrect);
-
+  board.lock();
+  board.setZoneState(isCorrect ? 'success' : 'error');
+  const feedback = container.querySelector('#speller-feedback');
   if (isCorrect) {
     audio.playSuccess();
-    if (feedback) {
-      feedback.className = 'feedback-banner show success';
-      feedback.textContent = `✓ Верно: ${q.target}`;
-    }
+    showFeedback(feedback, 'success', 'Верно!', escapeHtml(q.target));
   } else {
     audio.playMistake();
-    if (feedback) {
-      feedback.className = 'feedback-banner show error';
-      feedback.innerHTML = `✕ Ошибка. Правильное написание: <strong>${q.target}</strong>`;
+    showFeedback(feedback, 'error', `Правильное написание: <strong>${escapeHtml(q.target)}</strong>`, `Ваш вариант: ${escapeHtml(assembled)}`);
+  }
+
+  container.querySelector('#speller-check').hidden = true;
+  container.querySelector('#speller-clear').disabled = true;
+  const nextBtn = container.querySelector('#speller-next');
+  nextBtn.hidden = false;
+  nextBtn.focus();
+  setTimeout(listen, 350);
+}
+
+function next() {
+  audio.playClick();
+  audio.stopSpeech();
+  index += 1;
+  renderWord();
+}
+
+function onKeyDown(e) {
+  // Не перехватываем клавиши в полях ввода (например, в окне настроек)
+  if (!container || isModalOpen() || isTypingTarget(e.target) || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (index >= questions.length) return;
+
+  if (e.key === 'Enter') {
+    if (isOwnButton(e)) return;
+    e.preventDefault();
+    if (checked) next();
+    else check();
+  } else if (e.key === 'Backspace') {
+    e.preventDefault();
+    board?.pop();
+  } else if (e.key === ' ') {
+    if (isOwnButton(e)) return;
+    e.preventDefault();
+    listen();
+  } else if (!checked && e.key.length === 1 && /\p{L}|['’-]/u.test(e.key)) {
+    e.preventDefault();
+    if (board?.takeByText(e.key) && board.selected.length === targetLetters.length) {
+      container.querySelector('#speller-check')?.focus();
     }
   }
-
-  if (q.audio) {
-    audioBtn?.classList.add('playing');
-    audio.playSpeech(q.audio, null, () => audioBtn?.classList.remove('playing'), q.target, currentUnit?.lang);
-  }
-
-  if (checkBtn) checkBtn.style.display = 'none';
-  if (nextBtn) nextBtn.style.display = 'inline-block';
-  renderLetters();
 }
 
-function handleNext() {
-  audio.playClick();
-  currentIndex += 1;
-  renderCurrentWord();
-}
-
-function handleKeyDown(event) {
-  if (event.key === 'Backspace') {
-    handleBackspace();
-  } else if (event.key === 'Enter') {
-    if (isChecked) handleNext();
-    else handleCheck();
-  }
-}
-
-export function mountSpeller(container, unit) {
-  currentContainer = container;
-  currentUnit = unit;
-  currentIndex = 0;
-  questions = [...(unit.words || [])].sort(() => Math.random() - 0.5);
-
-  if (!questions.length) {
-    container.innerHTML = `
-      <div class="feedback-banner show error" style="margin-top: 20px;">
-        В этом уроке нет слов для режима спеллера.
-      </div>
-    `;
+export function mountSpeller(target, unitData) {
+  container = target;
+  unit = unitData;
+  if (!unit?.words?.length) {
+    container.innerHTML = emptyState('🔤', 'В этом уроке нет слов для спеллера', 'Попробуйте другие режимы.');
     return;
   }
-
-  window.addEventListener('keydown', handleKeyDown);
-  renderCurrentWord();
+  window.addEventListener('keydown', onKeyDown);
+  start();
 }
 
 export function destroySpeller() {
-  window.removeEventListener('keydown', handleKeyDown);
+  window.removeEventListener('keydown', onKeyDown);
   audio.stopSpeech();
-  currentContainer = null;
-  currentUnit = null;
+  container = null;
+  unit = null;
+  board = null;
 }

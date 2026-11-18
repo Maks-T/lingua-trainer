@@ -5,6 +5,8 @@ const STORAGE_KEYS = {
   CUSTOM_UNITS: 'lingua_custom_units',
   ACTIVE_TRACK: 'lingua_active_track',
   STATS: 'lingua_stats',
+  LAST_UNIT: 'lingua_last_unit',
+  MODE: 'lingua_mode',
 };
 
 class StateManager {
@@ -17,16 +19,34 @@ class StateManager {
     this.customUnits = this._loadJson(STORAGE_KEYS.CUSTOM_UNITS, {});
     this.stats = this._loadJson(STORAGE_KEYS.STATS, {});
 
-    this.currentProfileId = localStorage.getItem(STORAGE_KEYS.PROFILE) || 'dad';
+    this.currentProfileId = this._getItem(STORAGE_KEYS.PROFILE) || 'dad';
     this.activeTrackId = null;
-    this.activeMode = 'puzzle'; // 'puzzle' | 'speller' | 'reader' | 'analyzer'
+    // 'puzzle' | 'speller' | 'quiz' | 'dictation' | 'reader' | 'analyzer'
+    this.activeMode = this._getItem(STORAGE_KEYS.MODE) || 'puzzle';
     this.activeUnit = null;
     this.activeDomain = { lang: 'de', level: 'a1' };
   }
 
+  _getItem(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+
+  _setItem(key, value) {
+    try {
+      if (value === null || value === undefined) localStorage.removeItem(key);
+      else localStorage.setItem(key, value);
+    } catch {
+      /* приватный режим браузера */
+    }
+  }
+
   _loadJson(key, fallback) {
     try {
-      const data = localStorage.getItem(key);
+      const data = this._getItem(key);
       return data ? JSON.parse(data) : fallback;
     } catch {
       return fallback;
@@ -34,7 +54,11 @@ class StateManager {
   }
 
   _saveJson(key, val) {
-    localStorage.setItem(key, JSON.stringify(val));
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch (err) {
+      console.warn('[State] Не удалось сохранить в localStorage:', err);
+    }
   }
 
   initCatalogData(catalog) {
@@ -48,7 +72,7 @@ class StateManager {
     }
 
     // Восстанавливаем сохраненный трек для профиля
-    const savedTrackId = localStorage.getItem(`${STORAGE_KEYS.ACTIVE_TRACK}_${this.currentProfileId}`);
+    const savedTrackId = this._getItem(`${STORAGE_KEYS.ACTIVE_TRACK}_${this.currentProfileId}`);
     const tracks = this.getTracks(this.currentProfileId);
     const track = tracks.find((t) => t.id === savedTrackId) || tracks[0];
     if (track) {
@@ -119,10 +143,10 @@ class StateManager {
 
   setProfile(profileId) {
     this.currentProfileId = profileId;
-    localStorage.setItem(STORAGE_KEYS.PROFILE, profileId);
+    this._setItem(STORAGE_KEYS.PROFILE, profileId);
 
     const tracks = this.getTracks(profileId);
-    const savedTrackId = localStorage.getItem(`${STORAGE_KEYS.ACTIVE_TRACK}_${profileId}`);
+    const savedTrackId = this._getItem(`${STORAGE_KEYS.ACTIVE_TRACK}_${profileId}`);
     const track = tracks.find((t) => t.id === savedTrackId) || tracks[0] || null;
 
     if (track) {
@@ -167,7 +191,7 @@ class StateManager {
 
   setActiveTrack(trackId) {
     this.activeTrackId = trackId;
-    localStorage.setItem(`${STORAGE_KEYS.ACTIVE_TRACK}_${this.currentProfileId}`, trackId);
+    this._setItem(`${STORAGE_KEYS.ACTIVE_TRACK}_${this.currentProfileId}`, trackId);
     const track = this.getActiveTrack();
     if (track) {
       this.activeDomain = { lang: track.lang, level: track.level || 'custom', trackId: track.id };
@@ -204,7 +228,14 @@ class StateManager {
 
     if (this.activeTrackId === trackId) {
       const tracks = this.getTracks(profileId);
-      this.setActiveTrack(tracks[0]?.id || null);
+      if (tracks.length) {
+        this.setActiveTrack(tracks[0].id);
+      } else {
+        this.activeTrackId = null;
+        this._setItem(`${STORAGE_KEYS.ACTIVE_TRACK}_${profileId}`, null);
+        this.activeUnit = null;
+        this.notify('TRACK_CHANGED', null);
+      }
     } else {
       this.notify('TRACKS_UPDATED');
     }
@@ -227,6 +258,18 @@ class StateManager {
     return unit;
   }
 
+  deleteCustomUnit(trackId, unitId) {
+    const list = this.customUnits[trackId] || [];
+    this.customUnits[trackId] = list.filter((u) => u.id !== unitId);
+    this._saveJson(STORAGE_KEYS.CUSTOM_UNITS, this.customUnits);
+    if (this.stats[this.currentProfileId]) {
+      delete this.stats[this.currentProfileId][unitId];
+      this._saveJson(STORAGE_KEYS.STATS, this.stats);
+    }
+    if (this.activeUnit?.id === unitId) this.activeUnit = null;
+    this.notify('TRACKS_UPDATED');
+  }
+
   getCustomUnits(trackId) {
     return this.customUnits[trackId] || [];
   }
@@ -234,7 +277,16 @@ class StateManager {
   setMode(mode) {
     if (this.activeMode === mode) return;
     this.activeMode = mode;
+    this._setItem(STORAGE_KEYS.MODE, mode);
     this.notify('MODE_CHANGED', mode);
+  }
+
+  getLastUnitId(trackId) {
+    return this._getItem(`${STORAGE_KEYS.LAST_UNIT}_${trackId}`);
+  }
+
+  setLastUnitId(trackId, unitId) {
+    this._setItem(`${STORAGE_KEYS.LAST_UNIT}_${trackId}`, unitId);
   }
 
   setActiveUnit(unit) {
@@ -242,19 +294,26 @@ class StateManager {
     this.notify('UNIT_LOADED', unit);
   }
 
-  recordAnswer(unitId, isCorrect) {
+  /**
+   * @param {string} unitId
+   * @param {boolean} isCorrect
+   * @param {string|null} itemKey уникальный ключ задания (напр. "puzzle:s3") — верные ответы идут в прогресс урока
+   */
+  recordAnswer(unitId, isCorrect, itemKey = null) {
     if (!unitId) return;
     const profileId = this.currentProfileId;
     if (!this.stats[profileId]) {
       this.stats[profileId] = {};
     }
     if (!this.stats[profileId][unitId]) {
-      this.stats[profileId][unitId] = { correct: 0, mistakes: 0, lastStudied: null };
+      this.stats[profileId][unitId] = { correct: 0, mistakes: 0, lastStudied: null, done: [] };
     }
 
     const unitStat = this.stats[profileId][unitId];
+    if (!Array.isArray(unitStat.done)) unitStat.done = [];
     if (isCorrect) {
       unitStat.correct += 1;
+      if (itemKey && !unitStat.done.includes(itemKey)) unitStat.done.push(itemKey);
     } else {
       unitStat.mistakes += 1;
     }
@@ -264,7 +323,15 @@ class StateManager {
   }
 
   getUnitStats(unitId) {
-    return this.stats[this.currentProfileId]?.[unitId] || { correct: 0, mistakes: 0 };
+    return this.stats[this.currentProfileId]?.[unitId] || { correct: 0, mistakes: 0, done: [] };
+  }
+
+  resetUnitStats(unitId) {
+    if (this.stats[this.currentProfileId]?.[unitId]) {
+      delete this.stats[this.currentProfileId][unitId];
+      this._saveJson(STORAGE_KEYS.STATS, this.stats);
+      this.notify('STATS_UPDATED', { unitId });
+    }
   }
 
   subscribe(listener) {

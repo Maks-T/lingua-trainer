@@ -1,161 +1,187 @@
 import { audio } from '../core/audio.js';
+import { escapeHtml, tokenize, normalizeWord, emptyState, ICONS } from '../core/utils.js';
 
-let currentContainer = null;
-let currentUnit = null;
-let activeRowIndex = null;
+let container = null;
+let unit = null;
 let isPlayingAll = false;
+let popover = null;
+let popoverTimer = null;
 
-function stopReaderPlayback() {
-  isPlayingAll = false;
-  audio.stopSpeech();
-  if (activeRowIndex !== null && currentContainer) {
-    const rows = currentContainer.querySelectorAll('.reader-row');
-    rows.forEach((r) => r.classList.remove('active'));
-    activeRowIndex = null;
-  }
-  const playAllBtn = currentContainer?.querySelector('#reader-play-all-btn');
-  if (playAllBtn) playAllBtn.textContent = '▶ Слушать весь текст';
-}
-
-function playParagraph(index, onComplete = null) {
-  const paragraphs = currentUnit?.text || [];
-  if (index >= paragraphs.length) {
-    stopReaderPlayback();
-    return;
-  }
-
-  const item = paragraphs[index];
-  const rows = currentContainer?.querySelectorAll('.reader-row');
-  rows?.forEach((r, idx) => {
-    if (idx === index) r.classList.add('active');
-    else r.classList.remove('active');
-  });
-  activeRowIndex = index;
-
-  audio.playSpeech(
-    item.audio,
-    null,
-    () => {
-      if (onComplete) onComplete();
-    },
-    item.target,
-    currentUnit?.lang
+function findWord(raw) {
+  const clean = normalizeWord(raw);
+  const words = unit?.words || [];
+  return (
+    words.find((w) => normalizeWord(w.target) === clean) ||
+    // «heiße» → «heißen», «kommst» → «kommen»: совпадение по основе
+    words.find((w) => {
+      const base = normalizeWord(w.target);
+      const stem = base.length > 5 ? base.slice(0, base.length - 2) : base;
+      return stem.length >= 4 && clean.startsWith(stem);
+    }) ||
+    null
   );
 }
 
-function playAllSequence(startIndex = 0) {
-  isPlayingAll = true;
-  const playAllBtn = currentContainer?.querySelector('#reader-play-all-btn');
-  if (playAllBtn) playAllBtn.textContent = '⏹ Остановить';
+function setActiveRow(index) {
+  container?.querySelectorAll('.reader-row').forEach((r, i) => r.classList.toggle('active', i === index));
+}
 
+function setPlayAllLabel() {
+  const btn = container?.querySelector('#reader-play-all');
+  if (btn) btn.innerHTML = isPlayingAll ? `${ICONS.stop} Остановить` : `${ICONS.play} Слушать весь текст`;
+}
+
+function stopPlayback() {
+  isPlayingAll = false;
+  audio.stopSpeech();
+  setActiveRow(-1);
+  setPlayAllLabel();
+}
+
+function playParagraph(index, onComplete = null) {
+  const item = unit?.text?.[index];
+  if (!item) return;
+  setActiveRow(index);
+  container?.querySelectorAll('.reader-row')[index]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  audio.playSpeech(
+    item.audio,
+    null,
+    (err) => {
+      if (!isPlayingAll && err?.message !== 'stopped') setActiveRow(-1);
+      onComplete?.(err);
+    },
+    item.target,
+    unit.lang
+  );
+}
+
+function playAll(startIndex = 0) {
+  isPlayingAll = true;
+  setPlayAllLabel();
   const step = (idx) => {
-    if (!isPlayingAll) return;
-    if (idx >= (currentUnit?.text?.length || 0)) {
-      stopReaderPlayback();
+    if (!isPlayingAll || !container) return;
+    if (idx >= (unit?.text?.length || 0)) {
+      stopPlayback();
       return;
     }
-    playParagraph(idx, () => {
-      setTimeout(() => step(idx + 1), 300);
+    playParagraph(idx, (err) => {
+      if (err?.message === 'stopped') return;
+      setTimeout(() => step(idx + 1), 350);
     });
   };
-
   step(startIndex);
 }
 
-export function mountReader(container, unit) {
-  currentContainer = container;
-  currentUnit = unit;
-  activeRowIndex = null;
+function hidePopover() {
+  clearTimeout(popoverTimer);
+  popover?.remove();
+  popover = null;
+}
+
+function showPopover(span, word, match) {
+  hidePopover();
+  popover = document.createElement('div');
+  popover.className = 'word-popover';
+  popover.innerHTML = match
+    ? `<strong>${escapeHtml(match.target)}</strong>${match.transcript ? `${escapeHtml(match.transcript)}<br>` : ''}${escapeHtml(match.ru)}`
+    : `<strong>${escapeHtml(word)}</strong>нет в словаре урока`;
+  document.body.appendChild(popover);
+  const rect = span.getBoundingClientRect();
+  const pw = popover.offsetWidth;
+  const left = Math.min(window.innerWidth - pw - 8, Math.max(8, rect.left + rect.width / 2 - pw / 2));
+  const top = rect.top - popover.offsetHeight - 8;
+  popover.style.left = `${left}px`;
+  popover.style.top = `${top < 8 ? rect.bottom + 8 : top}px`;
+  popoverTimer = setTimeout(hidePopover, 2800);
+}
+
+function wrapWords(text) {
+  return tokenize(text || '')
+    .map((tok) => {
+      if (tok.type !== 'word') return escapeHtml(tok.text);
+      const known = findWord(tok.text) ? ' known' : '';
+      return `<span class="clickable-word${known}" data-word="${escapeHtml(tok.text)}">${escapeHtml(tok.text)}</span>`;
+    })
+    .join('');
+}
+
+export function mountReader(target, unitData) {
+  container = target;
+  unit = unitData;
   isPlayingAll = false;
 
-  const paragraphs = unit.text || [];
+  const paragraphs = unit?.text || [];
   if (!paragraphs.length) {
-    container.innerHTML = `
-      <div class="feedback-banner show error" style="margin-top: 20px;">
-        В этом уроке нет текста для режима чтения.
-      </div>
-    `;
+    container.innerHTML = emptyState('📖', 'В этом уроке нет текста для чтения');
     return;
   }
 
   container.innerHTML = `
-    <div class="exercise-wrapper">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <h2 style="font-size: 1.2rem; font-weight: 700;">${unit.title || 'Текст урока'}</h2>
-        <button type="button" class="analyzer-btn" id="reader-play-all-btn">▶ Слушать весь текст</button>
+    <div class="exercise">
+      <div class="reader-toolbar">
+        <h2 class="reader-title">${escapeHtml(unit.title || 'Текст урока')}</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <button type="button" class="btn btn-secondary btn-small" id="reader-toggle-ru">Скрыть перевод</button>
+          <button type="button" class="btn btn-primary btn-small" id="reader-play-all" style="min-width:0"></button>
+        </div>
       </div>
-
-      <div class="reader-container" id="reader-rows">
+      <p class="muted">Нажмите на строку, чтобы прослушать её. Нажмите на слово — услышите произношение и увидите перевод (подчёркнуты слова из словаря урока).</p>
+      <div class="reader-list" id="reader-list">
         ${paragraphs
           .map(
             (item, index) => `
           <div class="reader-row" data-index="${index}">
-            <button type="button" class="audio-btn" style="position: static; transform: none;" aria-label="Слушать предложение">🔊</button>
+            <button type="button" class="reader-play" aria-label="Слушать предложение">${ICONS.play}</button>
             <div class="reader-content">
-              <div class="reader-target">${wrapWordsForInspection(item.target)}</div>
-              <div class="reader-ru">${item.ru}</div>
+              <div class="reader-target" lang="${escapeHtml(unit.lang)}">${wrapWords(item.target)}</div>
+              ${item.ru ? `<div class="reader-ru">${escapeHtml(item.ru)}</div>` : ''}
             </div>
-          </div>
-        `
+          </div>`
           )
           .join('')}
       </div>
     </div>
   `;
+  setPlayAllLabel();
 
-  const rows = container.querySelectorAll('.reader-row');
-  rows.forEach((row, index) => {
-    const btn = row.querySelector('.audio-btn');
-    btn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (isPlayingAll) stopReaderPlayback();
-      playParagraph(index);
-    });
-
+  container.querySelectorAll('.reader-row').forEach((row, index) => {
     row.addEventListener('click', () => {
-      if (isPlayingAll) stopReaderPlayback();
+      if (isPlayingAll) stopPlayback();
       playParagraph(index);
     });
   });
 
-  const playAllBtn = container.querySelector('#reader-play-all-btn');
-  playAllBtn?.addEventListener('click', () => {
-    if (isPlayingAll) {
-      stopReaderPlayback();
-    } else {
-      playAllSequence(0);
-    }
+  container.querySelector('#reader-play-all').addEventListener('click', () => {
+    if (isPlayingAll) stopPlayback();
+    else playAll(0);
   });
 
-  // Обработка клика по отдельному слову для просмотра транскрипции/произношения
+  container.querySelector('#reader-toggle-ru').addEventListener('click', (e) => {
+    const list = container.querySelector('#reader-list');
+    const hidden = list.classList.toggle('hide-ru');
+    e.currentTarget.textContent = hidden ? 'Показать перевод' : 'Скрыть перевод';
+  });
+
   container.querySelectorAll('.clickable-word').forEach((span) => {
     span.addEventListener('click', (e) => {
       e.stopPropagation();
-      const rawWord = span.dataset.word;
-      const match = (unit.words || []).find(
-        (w) => w.target.toLowerCase() === rawWord.toLowerCase()
-      );
-      if (match && (match.audio || match.target)) {
-        audio.playSpeech(match.audio, null, null, match.target, currentUnit?.lang);
-      }
+      if (isPlayingAll) stopPlayback();
+      const word = span.dataset.word;
+      const match = findWord(word);
+      const exact = match && normalizeWord(match.target) === normalizeWord(word);
+      // Озвучиваем именно то слово, на которое нажали (mp3 — только при точном совпадении)
+      audio.playSpeech(exact ? match.audio : '', null, null, word, unit.lang);
+      showPopover(span, word, match);
     });
   });
-}
 
-function wrapWordsForInspection(text) {
-  if (!text) return '';
-  return text
-    .split(' ')
-    .map((token) => {
-      const clean = token.replace(/[.,!?;:«»""'’]/g, '');
-      return `<span class="clickable-word" data-word="${clean}" style="cursor: pointer;">${token}</span>`;
-    })
-    .join(' ');
+  window.addEventListener('scroll', hidePopover, { passive: true });
 }
 
 export function destroyReader() {
-  stopReaderPlayback();
-  currentContainer = null;
-  currentUnit = null;
-  activeRowIndex = null;
+  stopPlayback();
+  hidePopover();
+  window.removeEventListener('scroll', hidePopover);
+  container = null;
+  unit = null;
 }

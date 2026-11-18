@@ -430,6 +430,17 @@
       "audio": "audio/en/a2/unit_02/s14.mp3"
     }
   ],
+  "questions": [
+    {"id": "q1", "question": "What is graphology?", "ru": "Что такое графология?", "answer": "The study of handwriting", "options": ["The study of handwriting", "The study of personality tests", "The study of languages", "The study of drawing"], "ref": "t1", "audio": "audio/en/a2/unit_02/q1.mp3"},
+    {"id": "q2", "question": "How many personality traits can handwriting indicate?", "ru": "Сколько черт личности может показать почерк?", "answer": "More than 5,000", "options": ["More than 5,000", "About 50", "Exactly 500", "Fewer than 100"], "ref": "t3", "audio": "audio/en/a2/unit_02/q2.mp3"},
+    {"id": "q3", "question": "What does a confident person always know?", "ru": "Что всегда знает уверенный в себе человек?", "answer": "What they are doing", "options": ["What they are doing", "What other people think", "How to hide their feelings", "When to stop talking"], "ref": "t5", "audio": "audio/en/a2/unit_02/q3.mp3"},
+    {"id": "q4", "question": "What can a reserved person do?", "ru": "Что умеет сдержанный человек?", "answer": "Hide their feelings", "options": ["Hide their feelings", "Tell jokes all the time", "Break promises", "Control other people"], "ref": "t6", "audio": "audio/en/a2/unit_02/q4.mp3"},
+    {"id": "q5", "question": "What do people often think about an independent person?", "ru": "Что люди часто думают о независимом человеке?", "answer": "That they are arrogant", "options": ["That they are arrogant", "That they are shy", "That they are greedy", "That they are punctual"], "ref": "t10", "audio": "audio/en/a2/unit_02/q5.mp3"},
+    {"id": "q6", "question": "What does a bossy person often do?", "ru": "Что часто делает любитель командовать?", "answer": "Tells other people what to do", "options": ["Tells other people what to do", "Comes on time", "Shares their things", "Hides their feelings"], "ref": "t12", "audio": "audio/en/a2/unit_02/q6.mp3"},
+    {"id": "q7", "question": "What does a loner prefer?", "ru": "Что предпочитает одиночка?", "answer": "Being alone", "options": ["Being alone", "Spending time with other people", "Telling jokes", "Giving presents"], "ref": "t14", "audio": "audio/en/a2/unit_02/q7.mp3"},
+    {"id": "q8", "question": "What does a greedy person not like?", "ru": "Чего не любит жадный человек?", "answer": "Sharing their things, ideas or space", "options": ["Sharing their things, ideas or space", "Learning new things", "Being alone", "Waiting for others"], "ref": "t18", "audio": "audio/en/a2/unit_02/q8.mp3"},
+    {"id": "q9", "question": "Why do people trust a reliable person?", "ru": "Почему люди доверяют надёжному человеку?", "answer": "They never break a promise", "options": ["They never break a promise", "They are very talkative", "They are always late", "They like control"], "ref": "t19", "audio": "audio/en/a2/unit_02/q9.mp3"}
+  ],
   "colors": [
     {
       "color": "limeGreen",

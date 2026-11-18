@@ -2,142 +2,192 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f3f6fb" />
     <title>Lingua Studio</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3C8.8 3 3 8.4 3 15.1c0 3.4 1.5 6.4 3.9 8.6L6 29l5.6-2.8c1.4.5 2.9.7 4.4.7 7.2 0 13-5.4 13-12.1S23.2 3 16 3z' fill='%231a6ae8'/%3E%3Ccircle cx='16' cy='15' r='5' fill='white'/%3E%3C/svg%3E" />
+    <script>
+      // Тема применяется до отрисовки, чтобы не было «вспышки» светлого экрана
+      (function () {
+        try {
+          var saved = localStorage.getItem('lingua_theme');
+          var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div id="app" class="app-container">
-      <header class="app-header">
-        <div class="header-main">
-          <div class="brand">
-            <span class="brand-logo">🌐</span>
-            <span class="brand-name">Lingua Studio</span>
+    <div id="app" class="app">
+      <header class="topbar">
+        <div class="brand">
+          <svg class="brand-logo" viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M16 3C8.8 3 3 8.4 3 15.1c0 3.4 1.5 6.4 3.9 8.6L6 29l5.6-2.8c1.4.5 2.9.7 4.4.7 7.2 0 13-5.4 13-12.1S23.2 3 16 3z" />
+            <circle cx="16" cy="15" r="5" />
+          </svg>
+          <span class="brand-name">Lingua Studio</span>
+        </div>
+
+        <div class="course-picker">
+          <div class="pill-select">
+            <select id="course-select" aria-label="Курс"></select>
           </div>
+          <div class="pill-select pill-select-unit">
+            <select id="unit-select" aria-label="Урок"></select>
+          </div>
+          <button type="button" class="icon-btn icon-btn-sm" id="btn-delete-unit" title="Удалить свой урок" aria-label="Удалить урок" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" /></svg>
+          </button>
+        </div>
 
-          <select id="profile-select" class="select-control profile-select" aria-label="Выбор профиля"></select>
-
-          <div class="domain-selector">
-            <select id="course-select" class="select-control" aria-label="Выбор курса"></select>
-            <select id="unit-select" class="select-control" aria-label="Выбор урока"></select>
+        <div class="lesson-progress" title="Прогресс урока: задания, решённые верно хотя бы раз">
+          <div class="lesson-progress-title"><span>Прогресс урока</span><small id="lesson-score"></small></div>
+          <div class="lesson-progress-row">
+            <div class="progress-track"><span id="lesson-progress-bar"></span></div>
+            <span class="lesson-progress-pct" id="lesson-progress-pct">0%</span>
           </div>
         </div>
 
-        <div class="header-meta">
-          <div class="stats-panel" id="stats-panel">
-            <span class="stat-item"><span class="stat-label">Верно:</span> <strong id="stat-correct" class="stat-value text-success">0</strong></span>
-            <span class="stat-item"><span class="stat-label">Ошибки:</span> <strong id="stat-mistakes" class="stat-value text-danger">0</strong></span>
-          </div>
-
-          <div class="audio-rate-control">
-            <label for="audio-rate-select" class="rate-label">Скорость:</label>
-            <select id="audio-rate-select" class="select-control select-xs">
-              <option value="0.8">0.8x</option>
-              <option value="1.0" selected>1.0x</option>
-              <option value="1.2">1.2x</option>
+        <div class="topbar-actions">
+          <div class="rate-control" title="Скорость озвучки">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /></svg>
+            <select id="audio-rate-select" aria-label="Скорость озвучки">
+              <option value="0.7">0.7×</option>
+              <option value="0.85">0.85×</option>
+              <option value="1">1×</option>
+              <option value="1.2">1.2×</option>
             </select>
           </div>
-
-            <!-- Кнопка настроек в правом верхнем углу -->
-            <button type="button" class="btn-settings" id="btn-open-settings" title="Настройки профилей и зон" aria-label="Настройки">⚙️</button>
+          <button type="button" class="icon-btn" id="btn-theme" title="Сменить тему" aria-label="Сменить тему">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+          </button>
+          <div class="profile-picker">
+            <span class="profile-avatar" id="profile-avatar" aria-hidden="true">👤</span>
+            <select id="profile-select" aria-label="Профиль"></select>
+          </div>
+          <button type="button" class="icon-btn" id="btn-open-settings" title="Профили и учебные зоны" aria-label="Настройки">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" /></svg>
+          </button>
         </div>
       </header>
 
-      <nav class="mode-navigation">
-        <button type="button" class="mode-btn active" data-mode="puzzle">
-          <span class="mode-icon">🧩</span>
-          <span class="mode-title">Пазл предложений</span>
-        </button>
-        <button type="button" class="mode-btn" data-mode="speller">
-          <span class="mode-icon">🔤</span>
-          <span class="mode-title">Спеллер слов</span>
-        </button>
-        <button type="button" class="mode-btn" data-mode="reader">
-          <span class="mode-icon">📖</span>
-          <span class="mode-title">Умный ридер</span>
-        </button>
-        <button type="button" class="mode-btn" data-mode="analyzer">
-          <span class="mode-icon">🔬</span>
-          <span class="mode-title">Текст-лаборатория</span>
-        </button>
+      <nav class="mode-tabs" role="tablist" aria-label="Режимы тренировки">
+        <button type="button" class="mode-btn" role="tab" data-mode="puzzle"><span class="mode-icon">🧩</span>Пазл предложений</button>
+        <button type="button" class="mode-btn" role="tab" data-mode="speller"><span class="mode-icon">🔤</span>Спеллер слов</button>
+        <button type="button" class="mode-btn" role="tab" data-mode="quiz"><span class="mode-icon">❓</span>Вопросы к тексту</button>
+        <button type="button" class="mode-btn" role="tab" data-mode="dictation"><span class="mode-icon">🎧</span>Диктант на слух</button>
+        <button type="button" class="mode-btn" role="tab" data-mode="reader"><span class="mode-icon">📖</span>Умный ридер</button>
+        <button type="button" class="mode-btn" role="tab" data-mode="analyzer"><span class="mode-icon">🔬</span>Текст-лаборатория</button>
       </nav>
 
-      <main class="app-main" id="app-workspace">
-        <div class="loading-placeholder">
-          <div class="spinner"></div>
-          <p>Загрузка модуля урока...</p>
-        </div>
-      </main>
+      <div class="layout">
+        <main class="workspace" id="app-workspace">
+          <div class="loading-placeholder">
+            <div class="spinner"></div>
+            <p>Загрузка урока…</p>
+          </div>
+        </main>
+
+        <aside class="side-panel" aria-label="Информация об уроке">
+          <section class="motto-card" id="motto-card">
+            <svg class="motto-skyline" viewBox="0 0 400 220" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+              <path d="M0 220V150h22v-18h16v18h14v-40h26v40h10v-24h20v24h18V96h8V60h4V20h2v40h4v36h8v54h14v-30h24v30h12v-56h30v56h10v-20h18v20h16v-44h22v44h14v-28h20v28h16v-64h26v64h14v-34h22v34h18v70z" />
+              <circle cx="139" cy="66" r="9" />
+            </svg>
+            <div class="motto-text" id="motto-target">Lingua Studio</div>
+            <div class="motto-quote">
+              <span class="motto-mark">“</span>
+              <span id="motto-ru">Учите языки каждый день понемногу.</span>
+            </div>
+          </section>
+
+          <section class="side-card">
+            <h3 class="side-card-title">Статистика урока</h3>
+            <div class="stats-grid">
+              <div class="stat"><span class="stat-value text-success" id="stat-correct">0</span><span class="stat-label">верно</span></div>
+              <div class="stat"><span class="stat-value text-danger" id="stat-mistakes">0</span><span class="stat-label">ошибок</span></div>
+              <div class="stat"><span class="stat-value" id="stat-accuracy">—</span><span class="stat-label">точность</span></div>
+            </div>
+            <div class="stats-done" id="stat-done">Пройдено заданий: 0 из 0</div>
+            <button type="button" class="btn-link" id="btn-reset-progress">Сбросить прогресс урока</button>
+          </section>
+
+          <section class="side-card hint-card" id="hint-card"></section>
+        </aside>
+      </div>
 
       <div id="toast-container" class="toast-container" aria-live="polite"></div>
     </div>
 
-      <!-- Модальное окно настроек: Профили и Доменные зоны -->
-      <div id="settings-modal" class="modal-backdrop" hidden>
-        <div class="modal-window" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-          <div class="modal-header">
-            <h2 id="settings-title" class="modal-title">Настройки обучения</h2>
-            <button type="button" class="modal-close-btn" id="btn-close-settings" aria-label="Закрыть">✕</button>
-          </div>
+    <!-- Модальное окно настроек: профили и учебные зоны -->
+    <div id="settings-modal" class="modal-backdrop" hidden>
+      <div class="modal-window" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="modal-header">
+          <h2 id="settings-title" class="modal-title">Настройки обучения</h2>
+          <button type="button" class="icon-btn" id="btn-close-settings" aria-label="Закрыть">✕</button>
+        </div>
 
-          <div class="modal-tabs">
-            <button type="button" class="modal-tab-btn active" data-tab="profiles">Профили</button>
-            <button type="button" class="modal-tab-btn" data-tab="tracks">Доменные треки (Зоны)</button>
-          </div>
+        <div class="modal-tabs">
+          <button type="button" class="modal-tab-btn active" data-tab="profiles">Профили</button>
+          <button type="button" class="modal-tab-btn" data-tab="tracks">Учебные зоны</button>
+        </div>
 
-          <div class="modal-body">
-            <!-- Вкладка: Профили -->
-            <div class="tab-pane active" id="tab-pane-profiles">
-              <div class="settings-section">
-                <h3 class="section-title">Создать профиль</h3>
-                <form id="form-create-profile" class="form-row">
-                  <input type="text" id="input-profile-name" class="input-control" placeholder="Имя (напр. Папа, Сын)" required />
-                  <select id="select-profile-avatar" class="select-control select-avatar">
-                    <option value="👨‍💻">👨‍💻</option>
-                    <option value="👦">👦</option>
-                    <option value="👩‍🎓">👩‍🎓</option>
-                    <option value="🧑">🧑</option>
-                    <option value="🚀">🚀</option>
-                    <option value="⭐">⭐</option>
-                  </select>
-                  <button type="submit" class="btn-action-primary">Добавить</button>
-                </form>
-              </div>
-
-              <div class="settings-section">
-                <h3 class="section-title">Существующие профили</h3>
-                <div id="profiles-list" class="items-list"></div>
-              </div>
+        <div class="modal-body">
+          <div class="tab-pane active" id="tab-pane-profiles">
+            <div class="settings-section">
+              <h3 class="section-title">Создать профиль</h3>
+              <form id="form-create-profile" class="form-row">
+                <input type="text" id="input-profile-name" class="input-control" placeholder="Имя (напр. Папа, Сын)" maxlength="30" required />
+                <select id="select-profile-avatar" class="input-control select-avatar" aria-label="Аватар">
+                  <option value="👨‍💻">👨‍💻</option>
+                  <option value="👦">👦</option>
+                  <option value="👧">👧</option>
+                  <option value="👩‍🎓">👩‍🎓</option>
+                  <option value="🧑">🧑</option>
+                  <option value="🚀">🚀</option>
+                  <option value="⭐">⭐</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Добавить</button>
+              </form>
             </div>
 
-            <!-- Вкладка: Доменные треки (Зоны) -->
-            <div class="tab-pane" id="tab-pane-tracks">
-              <div class="settings-section">
-                <h3 class="section-title">Создать учебную зону</h3>
-                <p class="section-desc">Изолируйте темы (видео, подкасты, IT-лексику) от стандартных уроков.</p>
-                <form id="form-create-track" class="form-col">
-                  <div class="form-row">
-                    <select id="input-track-lang" class="select-control select-lang">
-                      <option value="de">🇩🇪 Немецкий</option>
-                      <option value="en">🇬🇧 Английский</option>
-                      <option value="pl">🇵🇱 Польский</option>
-                      <option value="es">🇪🇸 Испанский</option>
-                    </select>
-                    <input type="text" id="input-track-title" class="input-control" placeholder="Название трека (напр. YouTube подкасты)" required />
-                  </div>
-                  <input type="text" id="input-track-desc" class="input-control" placeholder="Описание (необязательно)" />
-                  <button type="submit" class="btn-action-primary" style="align-self: flex-start;">Создать трек</button>
-                </form>
-              </div>
+            <div class="settings-section">
+              <h3 class="section-title">Существующие профили</h3>
+              <div id="profiles-list" class="items-list"></div>
+            </div>
+          </div>
 
-              <div class="settings-section">
-                <h3 class="section-title">Учебные зоны текущего профиля</h3>
-                <div id="tracks-list" class="items-list"></div>
-              </div>
+          <div class="tab-pane" id="tab-pane-tracks">
+            <div class="settings-section">
+              <h3 class="section-title">Создать учебную зону</h3>
+              <p class="section-desc">Изолируйте темы (видео, подкасты, IT-лексику) от стандартных уроков. Уроки в зону добавляются из «Текст-лаборатории».</p>
+              <form id="form-create-track" class="form-col">
+                <div class="form-row">
+                  <select id="input-track-lang" class="input-control select-lang" aria-label="Язык">
+                    <option value="de">🇩🇪 Немецкий</option>
+                    <option value="en">🇬🇧 Английский</option>
+                    <option value="pl">🇵🇱 Польский</option>
+                    <option value="es">🇪🇸 Испанский</option>
+                  </select>
+                  <input type="text" id="input-track-title" class="input-control" placeholder="Название (напр. YouTube подкасты)" maxlength="60" required />
+                </div>
+                <input type="text" id="input-track-desc" class="input-control" placeholder="Описание (необязательно)" maxlength="120" />
+                <button type="submit" class="btn btn-primary" style="align-self: flex-start">Создать зону</button>
+              </form>
+            </div>
+
+            <div class="settings-section">
+              <h3 class="section-title">Учебные зоны текущего профиля</h3>
+              <div id="tracks-list" class="items-list"></div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
     <script type="module" src="./src/main.js"></script>
   </body>
