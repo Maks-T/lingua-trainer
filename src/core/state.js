@@ -21,7 +21,7 @@ class StateManager {
 
     this.currentProfileId = this._getItem(STORAGE_KEYS.PROFILE) || 'dad';
     this.activeTrackId = null;
-    // 'puzzle' | 'speller' | 'match' | 'quiz' | 'dictation' | 'reader' | 'analyzer'
+    // 'puzzle' | 'speller' | 'match' | 'quiz' | 'dictation' | 'videodict' | 'reader' | 'analyzer'
     this.activeMode = this._getItem(STORAGE_KEYS.MODE) || 'puzzle';
     this.activeUnit = null;
     this.activeDomain = { lang: 'de', level: 'a1' };

@@ -9,6 +9,7 @@ import { mountSpeller, destroySpeller } from './modes/speller.js';
 import { mountQuiz, destroyQuiz } from './modes/quiz.js';
 import { mountMatch, destroyMatch } from './modes/match.js';
 import { mountDictation, destroyDictation } from './modes/dictation.js';
+import { mountVideoDictation, destroyVideoDictation } from './modes/videodict.js';
 import { mountReader, destroyReader } from './modes/reader.js';
 import { mountAnalyzer, destroyAnalyzer } from './modes/analyzer.js';
 
@@ -18,6 +19,7 @@ const MODE_HANDLERS = {
   match: { mount: mountMatch, destroy: destroyMatch },
   quiz: { mount: mountQuiz, destroy: destroyQuiz },
   dictation: { mount: mountDictation, destroy: destroyDictation },
+  videodict: { mount: mountVideoDictation, destroy: destroyVideoDictation },
   reader: { mount: mountReader, destroy: destroyReader },
   analyzer: { mount: mountAnalyzer, destroy: destroyAnalyzer },
 };
@@ -65,6 +67,15 @@ const MODE_HINTS = {
       ['Tab', 'следующий пропуск'],
     ],
     note: 'Для немецкого можно писать ae/oe/ue/ss вместо ä/ö/ü/ß.',
+  },
+  videodict: {
+    title: 'Видео-диктант',
+    keys: [
+      ['Ctrl + Пробел', 'повторить фрагмент'],
+      ['Enter', 'проверить / дальше'],
+      ['Alt + ← / →', 'предыдущая / следующая фраза'],
+    ],
+    note: 'Свободный режим по оригинальному видео: выбирайте любую фразу в списке или перемотайте видео и нажмите «📍 Фраза в этом месте видео». На прогресс урока не влияет. Субтитры в самом плеере (CC) лучше не включать — они подскажут ответ.',
   },
   reader: {
     title: 'Умный ридер',
@@ -215,11 +226,19 @@ function renderMotto() {
   document.getElementById('motto-ru').textContent = motto?.ru || 'Немного практики каждый день.';
 }
 
+/** Вкладка «Видео-диктант» видна только у уроков с видео. */
+function updateModeTabs() {
+  const hasVideo = Boolean(getUnitVideo(state.activeUnit));
+  const tab = document.querySelector('.mode-btn[data-mode="videodict"]');
+  if (tab) tab.hidden = !hasVideo;
+}
+
 function renderVideoCard() {
   const card = document.getElementById('video-card');
   if (!card) return;
   const video = getUnitVideo(state.activeUnit);
-  card.hidden = !video;
+  // В видео-диктанте плеер уже на экране — карточка не нужна
+  card.hidden = !video || state.activeMode === 'videodict';
   if (!video) return;
   document.getElementById('video-thumb-img').src = thumbnailUrl(video);
   document.getElementById('video-card-title').textContent = video.title;
@@ -326,7 +345,12 @@ function mountCurrentMode() {
   const workspace = document.getElementById('app-workspace');
   if (!workspace) return;
 
-  const mode = MODE_HANDLERS[state.activeMode] ? state.activeMode : 'puzzle';
+  let mode = MODE_HANDLERS[state.activeMode] ? state.activeMode : 'puzzle';
+  // Видео-диктант есть только у уроков с видео — для остальных возвращаемся к пазлу
+  if (mode === 'videodict' && state.activeUnit && !getUnitVideo(state.activeUnit)) {
+    mode = 'puzzle';
+    state.activeMode = mode;
+  }
   currentModeName = mode;
   highlightModeTab(mode);
   renderHints();
@@ -598,11 +622,13 @@ function subscribeToState() {
         renderLessonProgress();
         renderMotto();
         renderVideoCard();
+        updateModeTabs();
         remountMode();
         syncUrl();
         break;
 
       case 'MODE_CHANGED':
+        renderVideoCard();
         remountMode();
         syncUrl();
         break;

@@ -2,13 +2,12 @@ import { state } from '../core/state.js';
 import { audio } from '../core/audio.js';
 import { getDictationItems } from '../core/exercises.js';
 import { createQueue, queueHeader, queueFinish } from '../core/queue.js';
+import { GAP_LEVELS as LEVELS, SPECIAL_KEYS, pickGapIndices, gradeGap as gradeGapCore, insertIntoInput } from '../core/gaps.js';
 import {
   escapeHtml,
   shuffle,
   tokenize,
   normalizeWord,
-  foldGerman,
-  levenshtein,
   isModalOpen,
   listenButton,
   playWithButton,
@@ -18,16 +17,6 @@ import {
 } from '../core/utils.js';
 
 const SETTINGS_KEY = 'lingua_dictation_settings';
-const LEVELS = {
-  easy: { label: '1 пропуск' },
-  medium: { label: 'Несколько' },
-  full: { label: 'Целиком' },
-};
-const SPECIAL_KEYS = {
-  de: ['ä', 'ö', 'ü', 'ß', 'Ä', 'Ö', 'Ü'],
-  pl: ['ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż'],
-  es: ['á', 'é', 'í', 'ó', 'ú', 'ñ', '¿', '¡'],
-};
 
 let container = null;
 
@@ -60,31 +49,6 @@ function saveSettings() {
   } catch {
     /* ignore */
   }
-}
-
-/** Слова из словаря урока важнее для тренировки — пропускаем их в первую очередь. */
-function vocabularyStems() {
-  return (unit.words || [])
-    .map((w) => normalizeWord(w.target))
-    .filter((w) => w.length >= 3)
-    .map((w) => (w.length > 5 ? w.slice(0, w.length - 2) : w));
-}
-
-function pickGaps(toks) {
-  const wordIdx = toks.map((t, i) => (t.type === 'word' ? i : -1)).filter((i) => i !== -1);
-  if (settings.level === 'full') return wordIdx;
-
-  const stems = vocabularyStems();
-  const score = (i) => {
-    const w = normalizeWord(toks[i].text);
-    if (stems.some((s) => w.startsWith(s))) return 3;
-    if (w.length >= 5) return 2;
-    if (w.length >= 3) return 1;
-    return 0;
-  };
-  const count = settings.level === 'easy' ? 1 : Math.min(5, Math.max(2, Math.round(wordIdx.length / 4)));
-  const ranked = shuffle(wordIdx).sort((a, b) => score(b) - score(a));
-  return ranked.slice(0, Math.min(count, wordIdx.length)).sort((a, b) => a - b);
 }
 
 function start() {
@@ -160,7 +124,7 @@ function renderItem() {
   const item = queue.current;
   checked = false;
   tokens = tokenize(item.target);
-  const gapIdx = new Set(pickGaps(tokens));
+  const gapIdx = new Set(pickGapIndices(tokens, settings.level, unit.words));
   gaps = [];
 
   const textHtml = tokens
@@ -243,12 +207,7 @@ function listen(slow = false) {
 
 function insertChar(ch) {
   const input = lastFocused && !lastFocused.readOnly ? lastFocused : gaps.find((g) => !g.input.readOnly)?.input;
-  if (!input) return;
-  const start = input.selectionStart ?? input.value.length;
-  const end = input.selectionEnd ?? input.value.length;
-  input.value = input.value.slice(0, start) + ch + input.value.slice(end);
-  input.focus();
-  input.setSelectionRange(start + ch.length, start + ch.length);
+  insertIntoInput(input, ch);
 }
 
 function hint() {
@@ -269,16 +228,6 @@ function hint() {
   audio.playClick();
 }
 
-function gradeGap(value, answer) {
-  const v = normalizeWord(value);
-  const a = normalizeWord(answer);
-  if (!v) return 'wrong';
-  if (v === a) return 'correct';
-  if (unit.lang === 'de' && foldGerman(value) === foldGerman(answer)) return 'correct';
-  if (a.length >= 4 && levenshtein(v, a) <= 1) return 'almost';
-  return 'wrong';
-}
-
 function check() {
   if (checked) return;
   checked = true;
@@ -287,7 +236,7 @@ function check() {
   let okCount = 0;
   let almostCount = 0;
   gaps.forEach((gap) => {
-    const grade = gradeGap(gap.input.value, gap.answer);
+    const grade = gradeGapCore(gap.input.value, gap.answer, unit.lang);
     gap.input.readOnly = true;
     gap.input.classList.add(grade);
     if (grade === 'correct') {
