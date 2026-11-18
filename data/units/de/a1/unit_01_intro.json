@@ -346,6 +346,17 @@
       "audio": "audio/de/a1/unit_01/s16.mp3"
     }
   ],
+  "questions": [
+    {"id": "q1", "question": "Wie heißt der Mann?", "ru": "Как зовут мужчину?", "answer": "Alex", "options": ["Alex", "Sarah", "Jonas", "Peter"], "ref": "t1", "audio": "audio/de/a1/unit_01/q1.mp3"},
+    {"id": "q2", "question": "Wie heißt die Frau?", "ru": "Как зовут женщину?", "answer": "Sarah", "options": ["Sarah", "Alex", "Anna", "Maria"], "ref": "t2", "audio": "audio/de/a1/unit_01/q2.mp3"},
+    {"id": "q3", "question": "Woher kommt Sarah?", "ru": "Откуда родом Сара?", "answer": "Aus Deutschland", "options": ["Aus Deutschland", "Aus Österreich", "Aus Russland", "Aus England"], "ref": "t4", "audio": "audio/de/a1/unit_01/q3.mp3"},
+    {"id": "q4", "question": "Wo wohnt Sarah jetzt?", "ru": "Где Сара живёт сейчас?", "answer": "In Wien", "options": ["In Wien", "In Berlin", "In München", "In Hamburg"], "ref": "t4", "audio": "audio/de/a1/unit_01/q4.mp3"},
+    {"id": "q5", "question": "Woher kommt Alex?", "ru": "Откуда родом Алекс?", "answer": "Aus Österreich", "options": ["Aus Österreich", "Aus Deutschland", "Aus der Schweiz", "Aus Polen"], "ref": "t5", "audio": "audio/de/a1/unit_01/q5.mp3"},
+    {"id": "q6", "question": "Was ist Alex von Beruf?", "ru": "Кто Алекс по профессии?", "answer": "Programmierer", "options": ["Programmierer", "Lehrer", "Arzt", "Student"], "ref": "t7", "audio": "audio/de/a1/unit_01/q6.mp3"},
+    {"id": "q7", "question": "Was lernt Alex jetzt?", "ru": "Что Алекс сейчас учит?", "answer": "Deutsch", "options": ["Deutsch", "Englisch", "Russisch", "Polnisch"], "ref": "t7", "audio": "audio/de/a1/unit_01/q7.mp3"},
+    {"id": "q8", "question": "Wie spricht Alex Deutsch?", "ru": "Как Алекс говорит по-немецки?", "answer": "Schon gut", "options": ["Schon gut", "Sehr schlecht", "Gar nicht", "Noch nicht"], "ref": "t8", "audio": "audio/de/a1/unit_01/q8.mp3"},
+    {"id": "q9", "question": "Was macht Spaß?", "ru": "Что доставляет удовольствие?", "answer": "Das Lernen", "options": ["Das Lernen", "Die Arbeit", "Das Wetter", "Die Stadt"], "ref": "t8", "audio": "audio/de/a1/unit_01/q9.mp3"}
+  ],
   "colors": [
     { "color": "limeGreen", "words": ["bin", "ist", "bist", "heiße", "heißt", "kommst", "komme", "wohne", "wohnst", "lerne", "lernt", "spreche", "sprichst", "verstehe", "versteht", "macht", "machen", "arbeiten", "arbeitest"] },
     { "color": "orangeRed", "words": ["Ich", "du", "er", "sie", "es", "wir", "dich", "mir"] },

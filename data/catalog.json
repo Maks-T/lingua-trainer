@@ -45,6 +45,7 @@
       "name": "Немецкий",
       "flag": "🇩🇪",
       "defaultVoice": "de-DE-ConradNeural",
+      "motto": { "target": "Deutsch öffnet neue Welten", "ru": "Немецкий открывает новые миры" },
       "levels": {
         "a1": {
           "title": "A1 — С нуля",
@@ -63,6 +64,7 @@
       "name": "Английский",
       "flag": "🇬🇧",
       "defaultVoice": "en-GB-RyanNeural",
+      "motto": { "target": "Every word is a step forward", "ru": "Каждое слово — шаг вперёд" },
       "levels": {
         "a2": {
           "title": "A2 — Базовый",
@@ -79,12 +81,6 @@
           "title": "B1 — Средний",
           "units": [
             {
-              "id": "en-b1-01",
-              "name": "Unit 1: Personality & Professional Skills",
-              "file": "data/units/en/b1/unit_01_skills.json",
-              "description": "Черты характера, профессиональные навыки и идиомы."
-            },
-            {
               "id": "en-b1-dm01",
               "name": "Dark Matter: Chapter 1 — The Abduction",
               "file": "data/units/en/b1/unit_dm_ch1.json",
@@ -98,6 +94,7 @@
       "name": "Польский",
       "flag": "🇵🇱",
       "defaultVoice": "pl-PL-MarekNeural",
+      "motto": { "target": "Krok po kroku do celu", "ru": "Шаг за шагом к цели" },
       "levels": {}
     }
   }
