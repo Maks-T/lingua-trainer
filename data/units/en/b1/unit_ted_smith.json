@@ -1,0 +1,598 @@
+{
+  "id": "en-b1-ted-smith",
+  "title": "TED: Larry Smith — Why you will fail to have a great career",
+  "lang": "en",
+  "level": "b1",
+  "voice": "en-GB-RyanNeural",
+  "source": {
+    "title": "Larry Smith: Why you will fail to have a great career (TEDxUW)",
+    "url": "https://www.youtube.com/watch?v=iKHTawgyKWQ"
+  },
+  "text": [
+    {
+      "id": "t1",
+      "target": "Larry Smith is a professor of economics, and he jokes that economists do “dismal” things. His talk has a provocative title: why you will fail to have a great career.",
+      "ru": "Ларри Смит — профессор экономики, и он шутит, что экономисты занимаются «мрачными» вещами. У его выступления провокационное название: почему у вас не получится великая карьера.",
+      "audio": "audio/en/b1/unit_ted_smith/t1.mp3"
+    },
+    {
+      "id": "t2",
+      "target": "He says that good jobs are disappearing. There are great careers, and there are high-stress, soul-destroying jobs, with almost nothing in between.",
+      "ru": "Он говорит, что хорошие рабочие места исчезают. Есть великие карьеры, а есть изматывающая, губящая душу работа — и почти ничего посередине.",
+      "audio": "audio/en/b1/unit_ted_smith/t2.mp3"
+    },
+    {
+      "id": "t3",
+      "target": "Everybody has heard the advice to pursue your passion. People watch famous commencement addresses again and again, and then they decide not to do it.",
+      "ru": "Все слышали совет следовать своей страсти. Люди снова и снова смотрят знаменитые напутственные речи выпускникам — а потом решают ничего не делать.",
+      "audio": "audio/en/b1/unit_ted_smith/t3.mp3"
+    },
+    {
+      "id": "t4",
+      "target": "Why? Some people are too lazy, and others are afraid. If they look for their passion and don’t find it, they will feel stupid, so they invent excuses.",
+      "ru": "Почему? Кому-то лень, а кто-то боится. Если искать своё призвание и не найти его, будешь чувствовать себя глупо — поэтому люди придумывают оправдания.",
+      "audio": "audio/en/b1/unit_ted_smith/t4.mp3"
+    },
+    {
+      "id": "t5",
+      "target": "The first excuse is luck: “Great careers are just a matter of luck, so I will stand around and hope to be lucky.”",
+      "ru": "Первое оправдание — удача: «Великая карьера — это просто везение, так что я подожду и понадеюсь, что повезёт».",
+      "audio": "audio/en/b1/unit_ted_smith/t5.mp3"
+    },
+    {
+      "id": "t6",
+      "target": "The second excuse is talent: “Only geniuses follow their passion, and I am just competent.” But today, calling yourself competent is damning yourself with faint praise.",
+      "ru": "Второе оправдание — талант: «Только гении следуют своей страсти, а я просто компетентен». Но сегодня назвать себя компетентным — значит похвалить себя так вяло, что это звучит почти как критика.",
+      "audio": "audio/en/b1/unit_ted_smith/t6.mp3"
+    },
+    {
+      "id": "t7",
+      "target": "Another excuse is that passionate people are obsessive and a little weird, while nice, normal people don’t need passion.",
+      "ru": "Ещё одно оправдание: увлечённые люди одержимы и немного странные, а милым нормальным людям страсть не нужна.",
+      "audio": "audio/en/b1/unit_ted_smith/t7.mp3"
+    },
+    {
+      "id": "t8",
+      "target": "Some people believe that hard work alone will bring them a great career. Smith says the world will happily let you work very hard, but the evidence shows that it is not enough.",
+      "ru": "Некоторые верят, что одна лишь упорная работа принесёт им великую карьеру. Смит говорит, что мир с радостью позволит вам работать очень много, но факты показывают, что этого недостаточно.",
+      "audio": "audio/en/b1/unit_ted_smith/t8.mp3"
+    },
+    {
+      "id": "t9",
+      "target": "An interest is not the same as a passion. You may need twenty interests before one of them grabs you and becomes your greatest love.",
+      "ru": "Интерес — это не то же самое, что страсть. Возможно, вам понадобится двадцать интересов, прежде чем один из них захватит вас и станет вашей главной любовью.",
+      "audio": "audio/en/b1/unit_ted_smith/t9.mp3"
+    },
+    {
+      "id": "t10",
+      "target": "To show the difference, he tells a story about a friend who proposed by listing all the women he had loved before. His girlfriend left the room halfway through the enumeration, and he decided he had had a narrow escape.",
+      "ru": "Чтобы показать разницу, он рассказывает историю о друге, который делал предложение, перечисляя всех женщин, которых любил раньше. Девушка ушла из комнаты посреди этого перечисления, а он решил, что чудом избежал ошибки.",
+      "audio": "audio/en/b1/unit_ted_smith/t10.mp3"
+    },
+    {
+      "id": "t11",
+      "target": "If you settle for something merely interesting, your tombstone may describe a distinguished engineer who invented Velcro, not a Nobel Prize winner in physics.",
+      "ru": "Если вы согласитесь на что-то просто интересное, на вашем надгробии может быть написано о заслуженном инженере, который изобрёл липучку, а не о лауреате Нобелевской премии по физике.",
+      "audio": "audio/en/b1/unit_ted_smith/t11.mp3"
+    },
+    {
+      "id": "t12",
+      "target": "The last excuse is relationships: “I value my family more than accomplishment, and I won’t sacrifice it on the altar of a great career.” Smith says people use their children as a shield.",
+      "ru": "Последнее оправдание — отношения: «Я ценю семью больше достижений и не принесу её в жертву на алтарь великой карьеры». Смит говорит, что люди прикрываются детьми как щитом.",
+      "audio": "audio/en/b1/unit_ted_smith/t12.mp3"
+    },
+    {
+      "id": "t13",
+      "target": "One day your child, who is good at maths, may tell you, “I want to be a magician. It is my dream.” What will you answer? That you had a dream too, but you were afraid?",
+      "ru": "Однажды ваш ребёнок, у которого хорошо с математикой, может сказать: «Я хочу стать фокусником. Это моя мечта». Что вы ответите? Что у вас тоже была мечта, но вы побоялись?",
+      "audio": "audio/en/b1/unit_ted_smith/t13.mp3"
+    },
+    {
+      "id": "t14",
+      "target": "The real reason is fear: fear of looking ridiculous, fear of trying, fear of failure. A great friend, a great parent and a great career can be one package.",
+      "ru": "Настоящая причина — страх: страх выглядеть нелепо, страх попробовать, страх неудачи. Отличный друг, отличный родитель и великая карьера могут быть одним целым.",
+      "audio": "audio/en/b1/unit_ted_smith/t14.mp3"
+    },
+    {
+      "id": "t15",
+      "target": "Smith ends with the word “unless”. Unless you act, one day the thought “If only I had…” will ricochet in your brain, and it will hurt a lot.",
+      "ru": "Смит заканчивает словом «если только не». Если вы не начнёте действовать, однажды мысль «Если бы только я…» будет рикошетом биться у вас в голове, и это будет очень больно.",
+      "audio": "audio/en/b1/unit_ted_smith/t15.mp3"
+    }
+  ],
+  "words": [
+    {
+      "id": "w1",
+      "target": "dismal",
+      "ru": "мрачный, унылый",
+      "transcript": "[ˈdɪzməl]",
+      "definition": "gloomy and depressing, without any hope or joy",
+      "distractorLetters": "o e u",
+      "audio": "audio/en/b1/unit_ted_smith/w1.mp3"
+    },
+    {
+      "id": "w2",
+      "target": "soul-destroying",
+      "ru": "губящий душу (о работе)",
+      "transcript": "[ˈsəʊl dɪˌstrɔɪɪŋ]",
+      "definition": "so boring or stressful that it takes away all your energy and joy",
+      "distractorLetters": "a u m",
+      "audio": "audio/en/b1/unit_ted_smith/w2.mp3"
+    },
+    {
+      "id": "w3",
+      "target": "pursue",
+      "ru": "следовать, добиваться",
+      "transcript": "[pəˈsjuː]",
+      "definition": "to try hard to achieve a goal over a long time",
+      "distractorLetters": "a i o",
+      "audio": "audio/en/b1/unit_ted_smith/w3.mp3"
+    },
+    {
+      "id": "w4",
+      "target": "passion",
+      "ru": "страсть, призвание",
+      "transcript": "[ˈpæʃn]",
+      "definition": "the activity you love more than anything else",
+      "distractorLetters": "e t u",
+      "audio": "audio/en/b1/unit_ted_smith/w4.mp3"
+    },
+    {
+      "id": "w5",
+      "target": "commencement",
+      "ru": "выпускная церемония (commencement address — напутственная речь)",
+      "transcript": "[kəˈmensmənt]",
+      "definition": "a university graduation ceremony",
+      "distractorLetters": "a i r",
+      "audio": "audio/en/b1/unit_ted_smith/w5.mp3"
+    },
+    {
+      "id": "w6",
+      "target": "excuse",
+      "ru": "оправдание, отговорка",
+      "transcript": "[ɪkˈskjuːs]",
+      "definition": "a reason you give to avoid doing something",
+      "distractorLetters": "a o i",
+      "audio": "audio/en/b1/unit_ted_smith/w6.mp3"
+    },
+    {
+      "id": "w7",
+      "target": "competent",
+      "ru": "компетентный, умелый",
+      "transcript": "[ˈkɒmpɪtənt]",
+      "definition": "able to do something well enough, but not brilliantly",
+      "distractorLetters": "a u i",
+      "audio": "audio/en/b1/unit_ted_smith/w7.mp3"
+    },
+    {
+      "id": "w8",
+      "target": "obsessive",
+      "ru": "одержимый, зацикленный",
+      "transcript": "[əbˈsesɪv]",
+      "definition": "thinking about one thing all the time",
+      "distractorLetters": "a u t",
+      "audio": "audio/en/b1/unit_ted_smith/w8.mp3"
+    },
+    {
+      "id": "w9",
+      "target": "enumeration",
+      "ru": "перечисление",
+      "transcript": "[ɪˌnjuːməˈreɪʃn]",
+      "definition": "naming things one by one, like in a list",
+      "distractorLetters": "s l c",
+      "audio": "audio/en/b1/unit_ted_smith/w9.mp3"
+    },
+    {
+      "id": "w10",
+      "target": "escape",
+      "ru": "спасение (a narrow escape — на волоске)",
+      "transcript": "[ɪˈskeɪp]",
+      "definition": "getting away from danger or from a bad situation",
+      "distractorLetters": "o i t",
+      "audio": "audio/en/b1/unit_ted_smith/w10.mp3"
+    },
+    {
+      "id": "w11",
+      "target": "distinguished",
+      "ru": "выдающийся, заслуженный",
+      "transcript": "[dɪˈstɪŋɡwɪʃt]",
+      "definition": "respected and successful in your field",
+      "distractorLetters": "a e o",
+      "audio": "audio/en/b1/unit_ted_smith/w11.mp3"
+    },
+    {
+      "id": "w12",
+      "target": "inscribed",
+      "ru": "выгравированный, высеченный",
+      "transcript": "[ɪnˈskraɪbd]",
+      "definition": "written or cut into stone or metal",
+      "distractorLetters": "a o t",
+      "audio": "audio/en/b1/unit_ted_smith/w12.mp3"
+    },
+    {
+      "id": "w13",
+      "target": "tombstone",
+      "ru": "надгробие",
+      "transcript": "[ˈtuːmstəʊn]",
+      "definition": "a stone on a grave with the person’s name",
+      "distractorLetters": "a i u",
+      "audio": "audio/en/b1/unit_ted_smith/w13.mp3"
+    },
+    {
+      "id": "w14",
+      "target": "sacrifice",
+      "ru": "жертвовать, жертва",
+      "transcript": "[ˈsækrɪfaɪs]",
+      "definition": "to give up something important for another goal",
+      "distractorLetters": "o u e",
+      "audio": "audio/en/b1/unit_ted_smith/w14.mp3"
+    },
+    {
+      "id": "w15",
+      "target": "altar",
+      "ru": "алтарь",
+      "transcript": "[ˈɔːltə]",
+      "definition": "a holy table in a church or temple",
+      "distractorLetters": "e o i",
+      "audio": "audio/en/b1/unit_ted_smith/w15.mp3"
+    },
+    {
+      "id": "w16",
+      "target": "accomplishment",
+      "ru": "достижение",
+      "transcript": "[əˈkʌmplɪʃmənt]",
+      "definition": "something important that you have succeeded in doing",
+      "distractorLetters": "e r u",
+      "audio": "audio/en/b1/unit_ted_smith/w16.mp3"
+    },
+    {
+      "id": "w17",
+      "target": "jailer",
+      "ru": "тюремщик, надзиратель",
+      "transcript": "[ˈdʒeɪlə]",
+      "definition": "a person who keeps prisoners locked up",
+      "distractorLetters": "o u y",
+      "audio": "audio/en/b1/unit_ted_smith/w17.mp3"
+    },
+    {
+      "id": "w18",
+      "target": "refuge",
+      "ru": "убежище, укрытие (seek refuge in — прятаться за)",
+      "transcript": "[ˈrefjuːdʒ]",
+      "definition": "a place where you are safe from danger",
+      "distractorLetters": "a i o",
+      "audio": "audio/en/b1/unit_ted_smith/w18.mp3"
+    },
+    {
+      "id": "w19",
+      "target": "evocative",
+      "ru": "выразительный, пробуждающий чувства",
+      "transcript": "[ɪˈvɒkətɪv]",
+      "definition": "bringing strong images, memories or feelings to mind",
+      "distractorLetters": "u s l",
+      "audio": "audio/en/b1/unit_ted_smith/w19.mp3"
+    },
+    {
+      "id": "w20",
+      "target": "ricochet",
+      "ru": "рикошетить, отскакивать",
+      "transcript": "[ˈrɪkəʃeɪ]",
+      "definition": "to bounce off a surface again and again",
+      "distractorLetters": "a u t",
+      "audio": "audio/en/b1/unit_ted_smith/w20.mp3"
+    },
+    {
+      "id": "w21",
+      "target": "evidence",
+      "ru": "доказательства, факты",
+      "transcript": "[ˈevɪdəns]",
+      "definition": "facts that show something is true",
+      "distractorLetters": "a o t",
+      "audio": "audio/en/b1/unit_ted_smith/w21.mp3"
+    },
+    {
+      "id": "w22",
+      "target": "ridiculous",
+      "ru": "нелепый, смешной",
+      "transcript": "[rɪˈdɪkjələs]",
+      "definition": "very silly and deserving to be laughed at",
+      "distractorLetters": "a e t",
+      "audio": "audio/en/b1/unit_ted_smith/w22.mp3"
+    },
+    {
+      "id": "w23",
+      "target": "settle",
+      "ru": "довольствоваться (settle for)",
+      "transcript": "[ˈsetl]",
+      "definition": "to accept something less good than you really wanted",
+      "distractorLetters": "a i o",
+      "audio": "audio/en/b1/unit_ted_smith/w23.mp3"
+    },
+    {
+      "id": "w24",
+      "target": "regret",
+      "ru": "сожаление, сожалеть",
+      "transcript": "[rɪˈɡret]",
+      "definition": "a sad feeling about something you did or didn’t do",
+      "distractorLetters": "a i o",
+      "audio": "audio/en/b1/unit_ted_smith/w24.mp3"
+    }
+  ],
+  "sentences": [
+    {
+      "id": "s1",
+      "target": "Good jobs are now disappearing.",
+      "ru": "Хорошие рабочие места сейчас исчезают.",
+      "distractorWords": ["growing", "is"],
+      "audio": "audio/en/b1/unit_ted_smith/s1.mp3"
+    },
+    {
+      "id": "s2",
+      "target": "You have to pursue your passion.",
+      "ru": "Ты должен следовать своей страсти.",
+      "distractorWords": ["interest", "must"],
+      "audio": "audio/en/b1/unit_ted_smith/s2.mp3"
+    },
+    {
+      "id": "s3",
+      "target": "Great careers are not just a matter of luck.",
+      "ru": "Великая карьера — это не просто вопрос удачи.",
+      "distractorWords": ["chance", "is"],
+      "audio": "audio/en/b1/unit_ted_smith/s3.mp3"
+    },
+    {
+      "id": "s4",
+      "target": "Being completely competent is no longer enough.",
+      "ru": "Быть просто полностью компетентным уже недостаточно.",
+      "distractorWords": ["more", "genius"],
+      "audio": "audio/en/b1/unit_ted_smith/s4.mp3"
+    },
+    {
+      "id": "s5",
+      "target": "Passionate people are not always weird.",
+      "ru": "Увлечённые люди не всегда странные.",
+      "distractorWords": ["never", "normal"],
+      "audio": "audio/en/b1/unit_ted_smith/s5.mp3"
+    },
+    {
+      "id": "s6",
+      "target": "Hard work alone will not give you a great career.",
+      "ru": "Одна лишь усердная работа не даст тебе великую карьеру.",
+      "distractorWords": ["good", "does"],
+      "audio": "audio/en/b1/unit_ted_smith/s6.mp3"
+    },
+    {
+      "id": "s7",
+      "target": "An interest is not the same as a passion.",
+      "ru": "Интерес — это не то же самое, что страсть.",
+      "distractorWords": ["different", "love"],
+      "audio": "audio/en/b1/unit_ted_smith/s7.mp3"
+    },
+    {
+      "id": "s8",
+      "target": "You need many interests to find your passion.",
+      "ru": "Нужно много интересов, чтобы найти свою страсть.",
+      "distractorWords": ["one", "lose"],
+      "audio": "audio/en/b1/unit_ted_smith/s8.mp3"
+    },
+    {
+      "id": "s9",
+      "target": "She left the room halfway through his list.",
+      "ru": "Она вышла из комнаты на середине его списка.",
+      "distractorWords": ["after", "her"],
+      "audio": "audio/en/b1/unit_ted_smith/s9.mp3"
+    },
+    {
+      "id": "s10",
+      "target": "He decided he had had a narrow escape.",
+      "ru": "Он решил, что чудом избежал беды.",
+      "distractorWords": ["wide", "has"],
+      "audio": "audio/en/b1/unit_ted_smith/s10.mp3"
+    },
+    {
+      "id": "s11",
+      "target": "Don't use your children as a shield.",
+      "ru": "Не прикрывайтесь своими детьми как щитом.",
+      "distractorWords": ["family", "sword"],
+      "audio": "audio/en/b1/unit_ted_smith/s11.mp3"
+    },
+    {
+      "id": "s12",
+      "target": "I had a dream once, but I was afraid.",
+      "ru": "Когда-то у меня была мечта, но я побоялся.",
+      "distractorWords": ["brave", "have"],
+      "audio": "audio/en/b1/unit_ted_smith/s12.mp3"
+    },
+    {
+      "id": "s13",
+      "target": "Go for it, just like I did!",
+      "ru": "Действуй, как когда-то сделал я!",
+      "distractorWords": ["do", "you"],
+      "audio": "audio/en/b1/unit_ted_smith/s13.mp3"
+    },
+    {
+      "id": "s14",
+      "target": "You are afraid to look ridiculous.",
+      "ru": "Ты боишься выглядеть нелепо.",
+      "distractorWords": ["happy", "seem"],
+      "audio": "audio/en/b1/unit_ted_smith/s14.mp3"
+    },
+    {
+      "id": "s15",
+      "target": "A great career and a great family can be one package.",
+      "ru": "Великая карьера и прекрасная семья могут быть одним целым.",
+      "distractorWords": ["must", "two"],
+      "audio": "audio/en/b1/unit_ted_smith/s15.mp3"
+    },
+    {
+      "id": "s16",
+      "target": "If only I had tried!",
+      "ru": "Если бы я только попробовал!",
+      "distractorWords": ["try", "when"],
+      "audio": "audio/en/b1/unit_ted_smith/s16.mp3"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is Larry Smith's profession?",
+      "ru": "Кто Ларри Смит по профессии?",
+      "answer": "A professor of economics",
+      "options": ["A professor of economics", "A psychologist", "A software engineer", "A physicist"],
+      "ref": "t1",
+      "audio": "audio/en/b1/unit_ted_smith/q1.mp3"
+    },
+    {
+      "id": "q2",
+      "question": "According to Smith, what is happening to good jobs?",
+      "ru": "Что, по словам Смита, происходит с хорошими рабочими местами?",
+      "answer": "They are disappearing",
+      "options": ["They are disappearing", "They are becoming better paid", "They are growing fast", "They are moving to Canada"],
+      "ref": "t2",
+      "audio": "audio/en/b1/unit_ted_smith/q2.mp3"
+    },
+    {
+      "id": "q3",
+      "question": "What do most people do after watching inspiring speeches about passion?",
+      "ru": "Что делает большинство людей, посмотрев вдохновляющие речи о страсти?",
+      "answer": "They decide not to act",
+      "options": ["They decide not to act", "They quit their jobs", "They start a business", "They write to the speaker"],
+      "ref": "t3",
+      "audio": "audio/en/b1/unit_ted_smith/q3.mp3"
+    },
+    {
+      "id": "q4",
+      "question": "Why do people invent excuses?",
+      "ru": "Почему люди придумывают оправдания?",
+      "answer": "They are afraid of looking for their passion and not finding it",
+      "options": ["They are afraid of looking for their passion and not finding it", "They have no free time", "Their bosses tell them to", "They already have great careers"],
+      "ref": "t4",
+      "audio": "audio/en/b1/unit_ted_smith/q4.mp3"
+    },
+    {
+      "id": "q5",
+      "question": "Why is “I am completely competent” a weak statement today?",
+      "ru": "Почему «я полностью компетентен» сегодня звучит слабо?",
+      "answer": "It is too modest to impress anyone",
+      "options": ["It is too modest to impress anyone", "It sounds arrogant", "It is usually a lie", "Employers don't understand it"],
+      "ref": "t6",
+      "audio": "audio/en/b1/unit_ted_smith/q5.mp3"
+    },
+    {
+      "id": "q6",
+      "question": "True or false: Smith believes that hard work alone guarantees a great career.",
+      "ru": "Верно или нет: Смит считает, что одна лишь усердная работа гарантирует великую карьеру.",
+      "answer": "False",
+      "options": ["False", "True"],
+      "ref": "t8",
+      "audio": "audio/en/b1/unit_ted_smith/q6.mp3"
+    },
+    {
+      "id": "q7",
+      "question": "What is the difference between an interest and a passion?",
+      "ru": "В чём разница между интересом и страстью?",
+      "answer": "A passion is your greatest love among many interests",
+      "options": ["A passion is your greatest love among many interests", "An interest is stronger than a passion", "There is no difference", "A passion comes only with luck"],
+      "ref": "t9",
+      "audio": "audio/en/b1/unit_ted_smith/q7.mp3"
+    },
+    {
+      "id": "q8",
+      "question": "How did Smith's friend propose to his girlfriend?",
+      "ru": "Как друг Смита сделал предложение своей девушке?",
+      "answer": "He listed all the women he had loved before",
+      "options": ["He listed all the women he had loved before", "He sang a song", "He wrote her a poem", "He proposed by email"],
+      "ref": "t10",
+      "audio": "audio/en/b1/unit_ted_smith/q8.mp3"
+    },
+    {
+      "id": "q9",
+      "question": "What did the friend decide after she left?",
+      "ru": "Что решил друг после того, как она ушла?",
+      "answer": "That he had had a narrow escape",
+      "options": ["That he had had a narrow escape", "That he would never marry", "That he should apologise", "That she was right"],
+      "ref": "t10",
+      "audio": "audio/en/b1/unit_ted_smith/q9.mp3"
+    },
+    {
+      "id": "q10",
+      "question": "What does the tombstone say in the “missed opportunity” version?",
+      "ru": "Что написано на надгробии в версии «упущенной возможности»?",
+      "answer": "A distinguished engineer who invented Velcro",
+      "options": ["A distinguished engineer who invented Velcro", "A Nobel Prize winner in physics", "A great parent and friend", "A famous magician"],
+      "ref": "t11",
+      "audio": "audio/en/b1/unit_ted_smith/q10.mp3"
+    },
+    {
+      "id": "q11",
+      "question": "Which excuse does Smith call using children as a shield?",
+      "ru": "Какое оправдание Смит называет «прикрываться детьми как щитом»?",
+      "answer": "Valuing relationships more than accomplishment",
+      "options": ["Valuing relationships more than accomplishment", "Not having enough money", "Being too old to change", "Living in a small town"],
+      "ref": "t12",
+      "audio": "audio/en/b1/unit_ted_smith/q11.mp3"
+    },
+    {
+      "id": "q12",
+      "question": "What does the child in Smith's story want to become?",
+      "ru": "Кем хочет стать ребёнок в истории Смита?",
+      "answer": "A magician",
+      "options": ["A magician", "A mathematician", "An economist", "An engineer"],
+      "ref": "t13",
+      "audio": "audio/en/b1/unit_ted_smith/q12.mp3"
+    },
+    {
+      "id": "q13",
+      "question": "True or false: Smith says a great career and a great family can go together.",
+      "ru": "Верно или нет: Смит говорит, что великая карьера и прекрасная семья совместимы.",
+      "answer": "True",
+      "options": ["True", "False"],
+      "ref": "t14",
+      "audio": "audio/en/b1/unit_ted_smith/q13.mp3"
+    },
+    {
+      "id": "q14",
+      "question": "What is the real reason people don't pursue their passion, according to Smith?",
+      "ru": "Какова, по Смиту, настоящая причина, по которой люди не следуют своей страсти?",
+      "answer": "Fear",
+      "options": ["Fear", "Laziness only", "Lack of education", "Bad luck"],
+      "ref": "t14",
+      "audio": "audio/en/b1/unit_ted_smith/q14.mp3"
+    },
+    {
+      "id": "q15",
+      "question": "Which word does Smith call the most evocative English word?",
+      "ru": "Какое слово Смит называет самым выразительным в английском языке?",
+      "answer": "Unless",
+      "options": ["Unless", "Passion", "Destiny", "Failure"],
+      "ref": "t15",
+      "audio": "audio/en/b1/unit_ted_smith/q15.mp3"
+    }
+  ],
+  "colors": [
+    {
+      "color": "limeGreen",
+      "words": ["pursue", "are", "is", "need", "use", "decided", "had", "left", "look", "tried", "did", "give", "find", "be", "Go"]
+    },
+    {
+      "color": "orangeRed",
+      "words": ["You", "you", "your", "I", "He", "he", "She", "his", "It"]
+    },
+    {
+      "color": "dodgerBlue",
+      "words": ["great", "good", "competent", "completely", "weird", "Passionate", "afraid", "ridiculous", "narrow", "enough"]
+    },
+    {
+      "color": "gold",
+      "words": ["a", "an", "the", "not", "no", "just", "alone", "only", "If", "as", "of", "to", "and", "but", "once"]
+    },
+    {
+      "color": "chocolate",
+      "words": ["now", "longer", "always", "halfway", "through", "like"]
+    },
+    {
+      "color": "darkOrchid",
+      "words": ["jobs", "passion", "careers", "career", "luck", "work", "interest", "interests", "room", "list", "escape", "children", "shield", "dream", "family", "package"]
+    }
+  ]
+}
